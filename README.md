@@ -129,6 +129,18 @@ result = erp.execute_tool("erp_get_inventory", item_id="1000")
 print(result)
 ```
 
+## Verification & Demo
+
+We have included a comprehensive demo script `demo_integrations.py` that simulates a full enterprise workflow using mock data (since real credentials are often protected).
+
+To run the demo and generate a visual report:
+```bash
+python3 demo_integrations.py
+```
+
+**Integration Report Output:**
+![Integration Report](integration_report.png)
+
 ## Future Roadmap
 
 *   **Full Ontology Layer**: Abstracting raw API data into a unified object model (Ontology).

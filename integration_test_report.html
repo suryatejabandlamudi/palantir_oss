@@ -1,0 +1,164 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1e1e1e; color: #d4d4d4; margin: 0; padding: 20px; }
+                h1 { color: #4ec9b0; border-bottom: 1px solid #333; padding-bottom: 10px; }
+                .event { background-color: #252526; margin-bottom: 15px; border-left: 4px solid #4ec9b0; padding: 15px; border-radius: 3px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+                .header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+                .source { font-weight: bold; color: #569cd6; }
+                .action { color: #dcdcaa; }
+                .timestamp { color: #808080; font-size: 0.9em; }
+                pre { background-color: #1e1e1e; padding: 10px; border-radius: 3px; overflow-x: auto; color: #9cdcfe; margin: 0; }
+                .status-SUCCESS { color: #6a9955; font-weight: bold; }
+                .status-ERROR { color: #f44747; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <h1>Palantir OSS - Integration Verification Log</h1>
+        
+            <div class="event">
+                <div class="header">
+                    <div>
+                        <span class="source">[Dynamics 365 (ERP)]</span>
+                        <span class="action">Check Inventory</span>
+                    </div>
+                    <span class="timestamp">19:20:29</span>
+                </div>
+                <div>Status: <span class="status-SUCCESS">SUCCESS</span></div>
+                <pre>[
+  {
+    "id": "item-1",
+    "number": "1000",
+    "displayName": "Industrial Pump",
+    "inventory": 45,
+    "unitPrice": 1200.0
+  },
+  {
+    "id": "item-2",
+    "number": "1001",
+    "displayName": "Valve Set",
+    "inventory": 12,
+    "unitPrice": 350.5
+  }
+]</pre>
+            </div>
+            
+            <div class="event">
+                <div class="header">
+                    <div>
+                        <span class="source">[Salesforce (CRM)]</span>
+                        <span class="action">Retrieve Leads</span>
+                    </div>
+                    <span class="timestamp">19:20:29</span>
+                </div>
+                <div>Status: <span class="status-SUCCESS">SUCCESS</span></div>
+                <pre>[
+  {
+    "Id": "lead-1",
+    "Name": "Acme Corp",
+    "Email": "contact@acme.com",
+    "Company": "Acme Corp",
+    "Status": "New"
+  },
+  {
+    "Id": "lead-2",
+    "Name": "Stark Ind",
+    "Email": "tony@stark.com",
+    "Company": "Stark Industries",
+    "Status": "Working"
+  }
+]</pre>
+            </div>
+            
+            <div class="event">
+                <div class="header">
+                    <div>
+                        <span class="source">[Workday (HRIS)]</span>
+                        <span class="action">Get Employee Details</span>
+                    </div>
+                    <span class="timestamp">19:20:29</span>
+                </div>
+                <div>Status: <span class="status-SUCCESS">SUCCESS</span></div>
+                <pre>{
+  "id": "emp-1",
+  "name": "John Doe",
+  "title": "Systems Engineer",
+  "department": "Engineering",
+  "email": "john.doe@example.com"
+}</pre>
+            </div>
+            
+            <div class="event">
+                <div class="header">
+                    <div>
+                        <span class="source">[Snowflake (Data)]</span>
+                        <span class="action">Execute SQL Query</span>
+                    </div>
+                    <span class="timestamp">19:20:29</span>
+                </div>
+                <div>Status: <span class="status-SUCCESS">SUCCESS</span></div>
+                <pre>{
+  "resultSetMetaData": {
+    "rowType": [
+      {
+        "name": "DATE"
+      },
+      {
+        "name": "REVENUE"
+      }
+    ]
+  },
+  "data": [
+    [
+      "2023-10-01",
+      15000.0
+    ],
+    [
+      "2023-10-02",
+      18200.5
+    ],
+    [
+      "2023-10-03",
+      14500.0
+    ]
+  ],
+  "code": null,
+  "message": null
+}</pre>
+            </div>
+            
+            <div class="event">
+                <div class="header">
+                    <div>
+                        <span class="source">[ServiceNow (ITSM)]</span>
+                        <span class="action">Create Incident</span>
+                    </div>
+                    <span class="timestamp">19:20:29</span>
+                </div>
+                <div>Status: <span class="status-SUCCESS">SUCCESS</span></div>
+                <pre>{
+  "number": "INC0012345",
+  "sys_id": "sys-123",
+  "state": "New",
+  "message": "Incident created successfully"
+}</pre>
+            </div>
+            
+            <div class="event">
+                <div class="header">
+                    <div>
+                        <span class="source">[Microsoft Teams]</span>
+                        <span class="action">Send Alert</span>
+                    </div>
+                    <span class="timestamp">19:20:29</span>
+                </div>
+                <div>Status: <span class="status-SUCCESS">SUCCESS</span></div>
+                <pre>{
+  "id": "msg-1",
+  "createdDateTime": "2023-10-27T10:00:00Z",
+  "message": "Message sent successfully"
+}</pre>
+            </div>
+            </body></html>
