@@ -5,9 +5,12 @@ from typing import List, Dict, Any
 
 class GeminiClient:
     def __init__(self, api_key: str = None, model: str = "gemini-1.5-flash"):
+        self.mock_mode = os.environ.get("MOCK_GEMINI") == "true"
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
-        if not self.api_key:
+        
+        if not self.api_key and not self.mock_mode:
             raise ValueError("GEMINI_API_KEY environment variable not set.")
+            
         self.model = model
         self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
 
@@ -15,6 +18,27 @@ class GeminiClient:
         """
         Generates a response from the Gemini API, handling tool definitions.
         """
+        if self.mock_mode:
+            # Simple mock logic for verification
+            last_msg = history[-1]["content"].lower()
+            if "inventory" in last_msg:
+                return {
+                    "content": "",
+                    "tool_calls": [{
+                        "name": "erp_get_inventory",
+                        "arguments": {"item_id": "1001"}
+                    }]
+                }
+            elif "tool 'erp_get_inventory' returned" in last_msg:
+                 return {
+                    "content": "The inventory for item 1001 is 50 units.",
+                    "tool_calls": []
+                }
+            else:
+                return {
+                    "content": "This is a mock response.",
+                    "tool_calls": []
+                }
         
         # Convert OpenAI-style history/tools to Gemini format
         contents = self._convert_history(history)

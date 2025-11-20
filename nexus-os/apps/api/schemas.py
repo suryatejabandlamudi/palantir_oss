@@ -152,6 +152,7 @@ class UserBase(BaseModel):
     full_name: Optional[str] = None
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
+    role: Optional[str] = "admin"
 
 class UserCreate(UserBase):
     password: str

@@ -139,6 +139,7 @@ class User(Base):
     full_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+    role = Column(String, default="admin") # admin, hr, supply_chain, sales, it
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 # --- Gotham Layer (Missions) ---

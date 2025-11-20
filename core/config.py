@@ -9,6 +9,9 @@ class Config:
     
     # LLM
     GEMINI_API_KEY: Optional[str] = os.environ.get("GEMINI_API_KEY")
+    LLM_PROVIDER: str = os.environ.get("LLM_PROVIDER", "gemini") # gemini or ollama
+    OLLAMA_BASE_URL: str = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+    OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "gpt-oss:20b")
 
     # ERP (Dynamics 365)
     D365_TENANT_ID: Optional[str] = os.environ.get("D365_TENANT_ID")

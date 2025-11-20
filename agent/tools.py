@@ -1,68 +1,109 @@
-from typing import List, Dict, Any, Callable
-from integrations.erp.client import ERPConnector
-from integrations.crm.client import CRMConnector
-from integrations.hris.client import HRISConnector
-from integrations.itsm.client import ITSMConnector
-from integrations.knowledge.client import KnowledgeConnector
-from integrations.comms.client import CommsConnector
-from integrations.data.client import DataConnector
-from rag.store import VectorStore
+from typing import Callable, Dict, Any, List, Optional
+from functools import wraps
+from agent.rbac import UserRole, check_access
 
 class ToolRegistry:
     def __init__(self):
-        self.connectors = {
-            "erp": ERPConnector(),
-            "crm": CRMConnector(),
-            "hris": HRISConnector(),
-            "itsm": ITSMConnector(),
-            "knowledge": KnowledgeConnector(),
-            "comms": CommsConnector(),
-            "data": DataConnector(),
-        }
-        self.vector_store = VectorStore()
-        self.tools_map = {}
-        self._register_tools()
+        self._tools: Dict[str, Dict[str, Any]] = {}
 
-    def _register_tools(self):
-        for name, connector in self.connectors.items():
-            tools = connector.get_tools()
-            for tool_def in tools:
-                tool_name = tool_def["name"]
-                self.tools_map[tool_name] = {
-                    "definition": tool_def,
-                    "connector": connector
-                }
+    def register(self, name: str, description: str, parameters: Dict[str, Any] = None):
+        """
+        Decorator to register a function as a tool.
         
-        # Register RAG Search Tool
-        self.tools_map["search_knowledge_base"] = {
-            "definition": {
-                "name": "search_knowledge_base",
-                "description": "Semantically searches the internal knowledge base (Jira, Confluence, etc.) for relevant information.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "The natural language query to search for."
-                        }
-                    },
-                    "required": ["query"]
-                }
-            },
-            "connector": self # Self-hosted tool
-        }
-
-    def get_all_tool_definitions(self) -> List[Dict[str, Any]]:
-        return [t["definition"] for t in self.tools_map.values()]
-
-    def execute_tool(self, tool_name: str, **kwargs) -> Any:
-        if tool_name not in self.tools_map:
-            raise ValueError(f"Tool {tool_name} not found.")
-        
-        tool_info = self.tools_map[tool_name]
-        connector = tool_info["connector"]
-        
-        if tool_name == "search_knowledge_base":
-            return self.vector_store.query(kwargs.get("query"))
+        Args:
+            name: The name of the tool (must match what's used in RBAC).
+            description: A description of what the tool does.
+            parameters: A JSON schema defining the tool's parameters.
+        """
+        def decorator(func: Callable):
+            self._tools[name] = {
+                "name": name,
+                "description": description,
+                "func": func,
+                "parameters": parameters or {"type": "object", "properties": {}}
+            }
             
-        return connector.execute_tool(tool_name, **kwargs)
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+            return wrapper
+        return decorator
+
+    def get_tools_for_role(self, role: UserRole) -> List[Dict[str, Any]]:
+        """
+        Returns the list of tool definitions allowed for the given role.
+        Formatted for the Gemini API.
+        """
+        allowed_tools = []
+        for name, tool_def in self._tools.items():
+            if check_access(role, name):
+                allowed_tools.append({
+                    "name": name,
+                    "description": tool_def["description"],
+                    "parameters": tool_def["parameters"]
+                })
+        return allowed_tools
+
+    def execute(self, name: str, arguments: Dict[str, Any], user_role: UserRole = None) -> Any:
+        """
+        Executes a tool by name, ensuring the user has access.
+        """
+        if name not in self._tools:
+            raise ValueError(f"Tool {name} not found")
+        
+        if user_role and not check_access(user_role, name):
+             raise PermissionError(f"Role {user_role.value} cannot access tool {name}")
+             
+        func = self._tools[name]["func"]
+        return func(**arguments)
+
+# Global registry instance
+registry = ToolRegistry()
+
+# --- Register Collaboration Tools ---
+from agent import tools_integration
+
+registry.register("send_slack_message", "Send a message to a Slack channel", {
+    "type": "object",
+    "properties": {
+        "channel": {"type": "string", "description": "The channel name (e.g., #general)"},
+        "message": {"type": "string", "description": "The message content"}
+    },
+    "required": ["channel", "message"]
+})(tools_integration.send_slack_message)
+
+registry.register("list_slack_channels", "List available Slack channels")(tools_integration.list_slack_channels)
+
+registry.register("send_teams_message", "Send a message to a Microsoft Teams chat", {
+    "type": "object",
+    "properties": {
+        "chat_id": {"type": "string", "description": "The chat ID"},
+        "message": {"type": "string", "description": "The message content"}
+    },
+    "required": ["chat_id", "message"]
+})(tools_integration.send_teams_message)
+
+registry.register("list_teams_chats", "List recent Microsoft Teams chats")(tools_integration.list_teams_chats)
+
+registry.register("list_onedrive_files", "List files in a OneDrive folder", {
+    "type": "object",
+    "properties": {
+        "folder": {"type": "string", "description": "The folder path (default: /)"}
+    }
+})(tools_integration.list_onedrive_files)
+
+registry.register("read_onedrive_file", "Read the content of a file from OneDrive", {
+    "type": "object",
+    "properties": {
+        "filename": {"type": "string", "description": "The name of the file to read"}
+    },
+    "required": ["filename"]
+})(tools_integration.read_onedrive_file)
+
+registry.register("search_sharepoint_sites", "Search for SharePoint sites", {
+    "type": "object",
+    "properties": {
+        "query": {"type": "string", "description": "The search query"}
+    },
+    "required": ["query"]
+})(tools_integration.search_sharepoint_sites)

@@ -16,6 +16,15 @@ from pipeline_engine import pipeline_engine
 import requests
 from jose import JWTError, jwt
 from database import get_db, engine
+import sys
+import os
+
+# Add parent directory to path to allow importing from agent
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
+
+from agent.llm import GeminiClient
+from agent.tools import registry
+from agent.rbac import UserRole
 
 # Create tables on startup
 models.Base.metadata.create_all(bind=engine)
@@ -402,6 +411,102 @@ def aip_chat(query: Dict[str, str] = Body(...)):
         "text": ai_text,
         "structured_data": structured_data
     }
+
+# --- Main Chat Endpoint (Role-Based + RAG) ---
+
+class ChatRequest(BaseModel):
+    message: str
+    role: str = "admin"
+    history: List[Dict[str, str]] = []
+
+@app.post("/chat")
+def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
+    """
+    Main chatbot endpoint handling:
+    1. Role-based access control
+    2. RAG context retrieval
+    3. Gemini API interaction
+    4. Tool execution
+    """
+    try:
+        # 1. Setup Role & Client
+        try:
+            user_role = UserRole(request.role)
+        except ValueError:
+            user_role = UserRole.ADMIN # Default fallback
+            
+        gemini = GeminiClient()
+        
+        # 2. Retrieve RAG Context
+        # Search for relevant objects/docs in vector store
+        context_results = vector_store.search(request.message)
+        context_str = ""
+        if context_results:
+            context_str = "Relevant Context from Knowledge Base:\n"
+            for r in context_results:
+                context_str += f"- {r['document']} (Source: {r['metadata'].get('title', 'Unknown')})\n"
+        
+        # 3. Prepare Tools
+        tools = registry.get_tools_for_role(user_role)
+        
+        # 4. Construct System Prompt
+        system_prompt = f"""You are Nexus AI, an advanced enterprise assistant for Palantir Nexus OS.
+        
+        Your Role: You are assisting a user with the role: {user_role.value}.
+        You must only answer questions and perform actions relevant to this role.
+        
+        Context Information:
+        {context_str}
+        
+        Instructions:
+        - Use the provided context to answer questions if relevant.
+        - You have access to specific tools based on the user's role. Use them when necessary to retrieve real-time data or perform actions.
+        - Be professional, concise, and helpful.
+        - If you need to use a tool, the system will handle the execution.
+        """
+        
+        # Add system prompt to history
+        full_history = [{"role": "user", "content": system_prompt}] + request.history + [{"role": "user", "content": request.message}]
+        
+        # 5. Call Gemini
+        response = gemini.generate_response(history=full_history, tools=tools)
+        
+        final_content = response["content"]
+        tool_calls_result = []
+        
+        # 6. Execute Tools
+        if response["tool_calls"]:
+            for tool_call in response["tool_calls"]:
+                tool_name = tool_call["name"]
+                tool_args = tool_call["arguments"]
+                
+                try:
+                    # Execute the tool
+                    result = registry.execute(tool_name, tool_args, user_role)
+                    tool_calls_result.append({
+                        "name": tool_name,
+                        "args": tool_args,
+                        "result": result
+                    })
+                    
+                    # Optional: Feed result back to LLM for final answer (simplified here)
+                    final_content += f"\n\n[Executed {tool_name}]: {json.dumps(result, default=str)}"
+                    
+                except Exception as e:
+                    tool_calls_result.append({
+                        "name": tool_name,
+                        "error": str(e)
+                    })
+                    final_content += f"\n\n[Error executing {tool_name}]: {str(e)}"
+
+        return {
+            "response": final_content,
+            "tool_calls": tool_calls_result
+        }
+
+    except Exception as e:
+        print(f"Chat Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # --- Ingestion Endpoints ---
 
