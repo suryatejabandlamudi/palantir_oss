@@ -1,0 +1,58 @@
+# Palantir Ecosystem Replica - Master Task List
+
+- [ ] **Research & Requirements Gathering** <!-- id: 0 -->
+    - [x] Read and analyze all local requirement text files <!-- id: 1 -->
+    - [ ] Research Palantir Foundry features and UI (Docs/Video) <!-- id: 2 -->
+    - [ ] Research Palantir Gotham features and UI (Docs/Video) <!-- id: 3 -->
+    - [ ] Research Palantir Apollo features and UI (Docs/Video) <!-- id: 4 -->
+    - [ ] Research Palantir AIP features and UI (Docs/Video) <!-- id: 5 -->
+    - [x] Synthesize findings into a comprehensive feature map <!-- id: 6 -->
+- [ ] **Architecture & Planning** <!-- id: 7 -->
+    - [x] Design system architecture (Frontend/Backend/Data) <!-- id: 8 -->
+    - [x] Create detailed implementation plan <!-- id: 9 -->
+- [x] **Deep Visual Research & Re-Architecture** <!-- id: 27 -->
+    - [x] Collect 20-30 Reference Screenshots (Foundry, Gotham, AIP, Apollo) <!-- id: 28 -->
+    - [x] Analyze UX Patterns (Docking, Data Density, Typography) <!-- id: 29 -->
+    - [x] Re-Engineer Architecture for "Real Product" Scale <!-- id: 30 -->
+- [/] **Implementation: Core Platform (Nexus OS)** <!-- id: 10 -->
+    - [x] **[NEW]** Implement Workspace UI (Docking System) <!-- id: 31 -->
+    - [x] **[NEW]** Migrate Object Storage to DuckDB <!-- id: 32 -->
+    - [x] **[NEW]** Implement Pipeline Execution Engine (Python + DuckDB) <!-- id: 33 -->
+    - [x] **[NEW]** Implement AIP Agentic Tools (SQL Generation, Pipeline Creation) <!-- id: 34 -->
+    - [/] Setup Monorepo structure <!-- id: 11 -->
+    - [x] Implement Design System (Carbon/Blueprint style) - *High Fidelity* <!-- id: 12 -->
+    - [x] **[NEW]** Implement Dynamic Ontology Backend (Real Schema/Data) <!-- id: 24 -->
+    - [x] **[NEW]** Implement Data Ingestion Engine (CSV/JSON -> Objects) <!-- id: 25 -->
+    - [/] **[NEW]** Setup Local LLM (GPT-OSS 20B) & RAG Engine <!-- id: 26 -->
+- [/] **Implementation: Foundry** <!-- id: 13 -->
+    - [x] Ontology Manager (Real CRUD) <!-- id: 14 -->
+    - [/] Pipeline Builder (Working Transformations) <!-- id: 15 -->
+- [ ] **Implementation: Gotham** <!-- id: 16 -->
+    - [ ] Graph View <!-- id: 17 -->
+    - [ ] Map View <!-- id: 18 -->
+- [ ] **Implementation: Apollo (Deployment System)** <!-- id: 23 -->
+- [ ] **Deep Integration Testing & Production Hardening** <!-- id: 35 -->
+    - [/] Fix API server startup and verify all endpoints <!-- id: 36 -->
+    - [/] Test DuckDB integration end-to-end with real data <!-- id: 37 -->
+    - [ ] Test Pipeline execution with complex transformations <!-- id: 38 -->
+    - [ ] Test GPT-OSS LLM integration with real prompts <!-- id: 39 -->
+    - [ ] Connect frontend pages to real backend APIs <!-- id: 40 -->
+    - [ ] Test full data flow (CSV → Ontology → SQL → Pipelines) <!-- id: 41 -->
+    - [ ] Add error handling and validation <!-- id: 42 -->
+    - [ ] Performance testing with large datasets <!-- id: 43 -->
+    - [x] **[NEW]** Implement Deck.gl for Gotham Map <!-- id: 44 -->
+    - [x] **[NEW]** Implement AG Grid for Object Explorer <!-- id: 45 -->
+    - [x] **[NEW]** Implement React Flow for Ontology Graph <!-- id: 46 -->
+    - [x] **[NEW]** Implement Advanced AIP Tool Calling <!-- id: 47 -->
+    - [ ] **[NEW]** Implement Real Apollo Deployment Logic <!-- id: 48 -->
+    - [ ] **[NEW]** Implement Multi-user Auth <!-- id: 49 -->
+
+# Phase 5: Production Hardening & Roadmap <!-- id: 50 -->
+- [x] **Repository**: Push to private GitHub repo <!-- id: 51 -->
+- [x] **Analysis**: Create comprehensive roadmap.md <!-- id: 52 -->
+- [ ] **Architecture**: Migrate Metadata to PostgreSQL <!-- id: 53 -->
+- [ ] **Compute**: Implement Celery/Redis for Async Pipelines <!-- id: 54 -->
+- [ ] **Security**: Implement OIDC/OAuth2 Authentication <!-- id: 55 -->
+- [ ] **Implementation: AIP** <!-- id: 21 -->
+    - [ ] AIP Logic <!-- id: 22 -->
+    - [ ] AIP Terminal <!-- id: 23 -->

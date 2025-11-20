@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-multipart
+chromadb
+sentence-transformers
+passlib
+python-jose[cryptography]
+bcrypt
+duckdb
+pandas
+celery[redis]
+redis
