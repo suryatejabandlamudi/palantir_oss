@@ -26,6 +26,22 @@ class GeminiClient:
             # Simple mock logic for verification
             last_msg = history[-1]["content"].lower()
             
+            # CFO Scenario
+            if "cash position" in last_msg or "cash trough" in last_msg:
+                return {
+                    "content": "I need to gather data on Receivables (AR), Payables (AP), and Sales Forecast to calculate the cash position.",
+                    "tool_calls": [
+                        {"name": "sap_get_ar_aging", "arguments": {}},
+                        {"name": "sap_get_ap_aging", "arguments": {}},
+                        {"name": "crm_get_commit_forecast", "arguments": {}}
+                    ]
+                }
+            elif "crm_get_commit_forecast" in last_msg or "sap_get_ar_aging" in last_msg:
+                 return {
+                    "content": "Based on the data:\n- AR (Receivables): $5M total, $3M current.\n- AP (Payables): $1.2M due in 7 days.\n- Sales Forecast: $15M commit for Q4.\n\nNet Cash Trough Analysis:\nWe have $1.2M leaving in 7 days. Current AR covers it, but it's tight. I recommend deferring the payment to Vendor V-INTEL ($500k) to preserve liquidity.",
+                    "tool_calls": []
+                }
+
             # Supply Chain Scenario
             # Check for tool results first to advance the state
             if "sap_get_orders_by_component" in last_msg:

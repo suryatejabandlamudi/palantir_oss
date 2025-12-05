@@ -75,6 +75,24 @@ class SAPConnector(BaseConnector):
                     },
                     "required": ["shipment_id"]
                 }
+            },
+            {
+                "name": "sap_get_ar_aging",
+                "description": "Retrieves Accounts Receivable aging report.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }
+            },
+            {
+                "name": "sap_get_ap_aging",
+                "description": "Retrieves Accounts Payable aging report (Vendor Invoices).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }
             }
         ]
 
@@ -85,8 +103,40 @@ class SAPConnector(BaseConnector):
             return self._update_delivery_date(kwargs.get("order_id"), kwargs.get("new_date"))
         elif tool_name == "sap_get_shipment_details":
             return self._get_shipment_details(kwargs.get("shipment_id"))
+        elif tool_name == "sap_get_ar_aging":
+            return self._get_ar_aging()
+        elif tool_name == "sap_get_ap_aging":
+            return self._get_ap_aging()
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
+
+    def _get_ar_aging(self) -> Dict[str, Any]:
+        if self.is_mock:
+            return {
+                "total_receivables": 5000000.0,
+                "0_30_days": 3000000.0,
+                "31_60_days": 1500000.0,
+                "61_90_days": 400000.0,
+                "90_plus_days": 100000.0,
+                "risk_accounts": ["CUST-SMALL-1", "CUST-RISK-2"]
+            }
+        # Real implementation would query FI-AR
+        return {}
+
+    def _get_ap_aging(self) -> Dict[str, Any]:
+        if self.is_mock:
+            return {
+                "total_payables": 4000000.0,
+                "due_next_7_days": 1200000.0,
+                "due_next_14_days": 800000.0,
+                "vendors": [
+                    {"vendor_id": "V-INTEL", "amount": 500000.0, "due_date": "2025-10-05"},
+                    {"vendor_id": "V-AMD", "amount": 300000.0, "due_date": "2025-10-08"},
+                    {"vendor_id": "V-TSMC", "amount": 400000.0, "due_date": "2025-10-10"}
+                ]
+            }
+        # Real implementation would query FI-AP
+        return {}
 
     def _get_orders_by_component(self, component_id: str) -> List[Dict[str, Any]]:
         if self.is_mock:
