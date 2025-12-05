@@ -26,6 +26,69 @@ class GeminiClient:
             # Simple mock logic for verification
             last_msg = history[-1]["content"].lower()
             
+            # HR Scenario
+            if "burnout" in last_msg or "attrition" in last_msg:
+                return {
+                    "content": "I will check for burnout signals (Time Off + Meeting Load) for Team Engineering.",
+                    "tool_calls": [
+                        {"name": "wd_get_team_timeoff", "arguments": {"team_id": "TEAM-ENG"}},
+                        {"name": "search_knowledge_base", "arguments": {"query": "burnout policy"}}
+                    ]
+                }
+            elif "wd_get_team_timeoff" in last_msg or "search_knowledge_base" in last_msg:
+                 return {
+                    "content": "Sarah Connor has 120 hours of leave balance and hasn't taken leave since May. I should check her meeting load.",
+                    "tool_calls": [
+                        {"name": "ms_get_meeting_stats", "arguments": {"email": "sarah@company.com"}}
+                    ]
+                }
+            elif "ms_get_meeting_stats" in last_msg:
+                 return {
+                    "content": "Sarah is working 35 hours/week in meetings with after-hours activity. This matches the 'Burnout' criteria in the policy. I will notify her manager.",
+                    "tool_calls": [
+                        {
+                            "name": "wd_notify_manager", 
+                            "arguments": {
+                                "manager_id": "MGR-001", 
+                                "message": "Risk Alert: Sarah Connor shows high burnout signals (No leave + 35h meetings). Policy DOC-HR-003 recommends immediate intervention."
+                            }
+                        }
+                    ]
+                }
+            elif "wd_notify_manager" in last_msg:
+                return {
+                    "content": "Manager notified.",
+                    "tool_calls": []
+                }
+
+            # CTO Scenario (Moved below HR to avoid conflict if logic is loose)
+            elif "risky changes" in last_msg or "release-risk" in last_msg:
+                return {
+                    "content": "I will check for risky changes and verify them against our deployment policies.",
+                    "tool_calls": [
+                        {"name": "jira_get_risky_changes", "arguments": {}},
+                        {"name": "search_knowledge_base", "arguments": {"query": "deployment rollback policy"}}
+                    ]
+                }
+            elif "jira_get_risky_changes" in last_msg: # Removed OR search_knowledge_base to be safer
+                 return {
+                    "content": "I found a high-risk change (PROJ-101) 'Migrate User DB' with Risk Score 9 and NO rollback plan. The policy requires a rollback plan for high-risk changes. I must block this.",
+                    "tool_calls": [
+                        {
+                            "name": "jira_block_deployment", 
+                            "arguments": {
+                                "ticket_id": "PROJ-101", 
+                                "reason": "Violation of Deployment Policy v2.1: High risk change (Score 9) missing rollback plan."
+                            }
+                        }
+                    ]
+                }
+            elif "jira_block_deployment" in last_msg:
+                return {
+                    "content": "Deployment PROJ-101 has been blocked and the owner notified.",
+                    "tool_calls": []
+                }
+
             # CFO Scenario
             if "cash position" in last_msg or "cash trough" in last_msg:
                 return {

@@ -83,33 +83,60 @@ Create **Accounts** to define the "Strategic" value:
     *   `Short Description`: "Supply Chain Delay Impacting Tesla (SO-1002)"
     *   `Urgency`: `High`
 
-#### 4. Workday (HRIS) - For the "People" Wedge (Optional)
-If showing the **HR Attrition Radar**:
-*   **Employee:** `Sarah Connor` (Engineering Lead)
-*   **Data:**
-    *   `TimeOffBalance`: `120 hours` (High - not taking leave)
-    *   `LastPromotion`: `3 years ago`
-    *   `Performance`: `Exceeds Expectations`
+#### 6. Jira (Dev/Ops) - For CTO Release-Risk Gate
+*   **Project:** `PROJ`
+*   **Ticket 1:**
+    *   `Key`: `PROJ-101`
+    *   `Summary`: "Migrate User DB to New Schema"
+    *   `Risk Score`: `9` (High)
+    *   `Rollback Plan`: `None` (This triggers the block)
+*   **Ticket 2:**
+    *   `Key`: `PROJ-102`
+    *   `Summary`: "Update Frontend Assets"
+    *   `Risk Score`: `2`
+    *   `Rollback Plan`: "Attached"
 
-#### 5. Microsoft 365 (Comms) - The "Noise"
-*   **Email:** Send an email to yourself (the user) from "Supplier":
-    *   `Subject`: "Urgent: Delay on Component X"
-    *   `Body`: "We are facing a 9-day delay on PO-998877 for Component X."
+#### 7. Workday (HRIS) - For HR Attrition Radar
+*   **Employee:** `Sarah Connor`
+    *   `Role`: `Engineering Lead`
+    *   `Time Off Balance`: `120 hours`
+    *   `Last Leave`: `6 months ago`
+*   **Employee:** `John Doe`
+    *   `Role`: `Senior Dev`
+    *   `Time Off Balance`: `10 hours`
+
+#### 8. Microsoft 365 (Comms) - For Burnout Signals
+*   **User:** `sarah@company.com`
+*   **Calendar Data:**
+    *   `Weekly Meeting Hours`: `35`
+    *   `After Hours Meetings`: `4`
 
 ---
 
-## 3. How to Run the Demo
+## 3. How to Run the Demos
 
-1.  **Configure:** Fill in `.env` or export variables for the platforms you have set up.
-2.  **Run Supply Chain Agent:**
+1.  **Configure:** Fill in `.env` or export variables.
+2.  **Supply Chain Demo:**
     ```bash
     python3 main_supply_chain.py
     ```
-    *   *Note: If you lack real credentials, the system automatically falls back to the "Perfect Demo" mock data.*
+    *   *Scenario:* Delay on Component X -> Updates SAP -> Creates ServiceNow Incident.
 
-3.  **Observe:**
-    *   Agent notices the delay event.
-    *   Agent queries SAP for affected orders.
-    *   Agent identifies Tesla as "Strategic" (via Salesforce logic).
-    *   Agent updates SAP delivery dates.
-    *   Agent opens a ServiceNow incident for the high-value risk.
+3.  **CFO Cash-Conversion Demo:**
+    ```bash
+    python3 main_cfo.py
+    ```
+    *   *Scenario:* Analyzes AR/AP/Forecast -> Recommends Vendor Payment Deferral.
+
+4.  **CTO Release-Risk Demo:**
+    ```bash
+    python3 main_cto.py
+    ```
+    *   *Scenario:* Checks Jira for risky changes -> Checks Policy (RAG) -> Blocks Deployment.
+
+5.  **HR Attrition Radar Demo:**
+    ```bash
+    python3 main_hr.py
+    ```
+    *   *Scenario:* Checks Workday (No Leave) + M365 (High Meetings) -> Detects Burnout -> Notifies Manager.
+

@@ -1,16 +1,26 @@
-import chromadb
+try:
+    import chromadb
+except ImportError:
+    chromadb = None
+
 import uuid
 from typing import List, Dict, Any, Optional
 from agent.llm import GeminiClient
 
 class VectorStore:
     def __init__(self, collection_name: str = "palantir_knowledge"):
+        if not chromadb:
+            print("WARNING: chromadb not installed. VectorStore will not function.")
+            self.client = None
+            self.collection = None
+            self.llm_client = None
+            return
+
         # Persistent client
         self.client = chromadb.PersistentClient(path="./chroma_db")
         self.collection = self.client.get_or_create_collection(name=collection_name)
         
         # Embedding function (using our GeminiClient)
-        # We initialize it here. In a real app, we might inject it.
         try:
             self.llm_client = GeminiClient()
         except ValueError:
