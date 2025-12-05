@@ -30,7 +30,21 @@ class GeminiClient:
             # Check for tool results first to advance the state
             if "sap_get_orders_by_component" in last_msg:
                 return {
-                    "content": "Found 2 affected orders. Order SO-1001 (Apple) and SO-1002 (Tesla). The delay is 9 days. I should update the delivery dates.",
+                    "content": "Found 2 affected orders. Order SO-1001 (Apple) and SO-1002 (Tesla). The delay is 9 days. I should check the strategic importance of these customers.",
+                    "tool_calls": [
+                        {
+                            "name": "crm_get_account_details",
+                            "arguments": {"account_name": "Apple Inc."}
+                        },
+                        {
+                            "name": "crm_get_account_details",
+                            "arguments": {"account_name": "Tesla Inc."}
+                        }
+                    ]
+                }
+            elif "crm_get_account_details" in last_msg:
+                 return {
+                    "content": "Tesla is a Strategic Partner ($80B Revenue). Apple is a Standard Customer. I must prioritize Tesla. I will update delivery dates for both, but create an incident for Tesla.",
                     "tool_calls": [
                         {
                             "name": "sap_update_delivery_date",

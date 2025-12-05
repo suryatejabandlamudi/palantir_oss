@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
 from integrations.erp.sap import SAPConnector
 from integrations.itsm.client import ITSMConnector
+from integrations.crm.salesforce import SalesforceConnector
 from agent.llm import GeminiClient
 import json
 import datetime
@@ -9,12 +10,14 @@ class SupplyChainAgent:
     def __init__(self):
         self.sap = SAPConnector()
         self.itsm = ITSMConnector()
+        self.sfdc = SalesforceConnector()
         self.llm = GeminiClient()
         
         # Aggregate tools
         self.tools = []
         self.tools.extend(self.sap.get_tools())
         self.tools.extend(self.itsm.get_tools())
+        self.tools.extend(self.sfdc.get_tools())
         
         # Map tool names to functions for execution
         self.tool_map = {
@@ -22,7 +25,9 @@ class SupplyChainAgent:
             "sap_update_delivery_date": self.sap.execute_tool,
             "sap_get_shipment_details": self.sap.execute_tool,
             "itsm_create_incident": self.itsm.execute_tool,
-            "itsm_get_ticket_status": self.itsm.execute_tool
+            "itsm_get_ticket_status": self.itsm.execute_tool,
+            "crm_get_account_details": self.sfdc.execute_tool,
+            "crm_get_commit_forecast": self.sfdc.execute_tool
         }
 
     def run(self, event: Dict[str, Any]):
