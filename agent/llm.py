@@ -25,7 +25,53 @@ class GeminiClient:
         if self.mock_mode:
             # Simple mock logic for verification
             last_msg = history[-1]["content"].lower()
-            if "inventory" in last_msg:
+            
+            # Supply Chain Scenario
+            # Check for tool results first to advance the state
+            if "sap_get_orders_by_component" in last_msg:
+                return {
+                    "content": "Found 2 affected orders. Order SO-1001 (Apple) and SO-1002 (Tesla). The delay is 9 days. I should update the delivery dates.",
+                    "tool_calls": [
+                        {
+                            "name": "sap_update_delivery_date",
+                            "arguments": {"order_id": "SO-1001", "new_date": "2025-09-10"}
+                        },
+                        {
+                            "name": "sap_update_delivery_date",
+                            "arguments": {"order_id": "SO-1002", "new_date": "2025-09-10"}
+                        }
+                    ]
+                }
+            elif "sap_update_delivery_date" in last_msg:
+                 return {
+                    "content": "Delivery dates updated. Since Tesla is a strategic customer and the amount is large ($1.2M), I will create an incident ticket to track this risk.",
+                    "tool_calls": [{
+                        "name": "itsm_create_incident",
+                        "arguments": {
+                            "short_description": "Supply Chain Delay Impacting Tesla (SO-1002)",
+                            "description": "Component COMP-X delay of 9 days affects Order SO-1002. Delivery date updated to 2025-09-10.",
+                            "urgency": "1"
+                        }
+                    }]
+                }
+            elif "itsm_create_incident" in last_msg:
+                return {
+                    "content": "Incident created. All actions completed for this event.",
+                    "tool_calls": []
+                }
+            
+            # Initial Trigger
+            elif "componentdeliverydelayed" in last_msg or "comp-x" in last_msg:
+                return {
+                    "content": "I see a delay for Component X. I need to check which orders are affected.",
+                    "tool_calls": [{
+                        "name": "sap_get_orders_by_component",
+                        "arguments": {"component_id": "COMP-X"}
+                    }]
+                }
+
+            # Original Inventory Mock
+            elif "inventory" in last_msg:
                 return {
                     "content": "",
                     "tool_calls": [{

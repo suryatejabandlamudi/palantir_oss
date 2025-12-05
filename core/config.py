@@ -89,6 +89,11 @@ class Config:
     SNOWFLAKE_PRIVATE_KEY = os.environ.get("SNOWFLAKE_PRIVATE_KEY")
     SNOWFLAKE_JWT = os.environ.get("SNOWFLAKE_JWT")
 
+    # SAP
+    SAP_URL: Optional[str] = os.environ.get("SAP_URL")
+    SAP_USERNAME: Optional[str] = os.environ.get("SAP_USERNAME")
+    SAP_PASSWORD: Optional[str] = os.environ.get("SAP_PASSWORD")
+
     @classmethod
     def validate(cls):
         """
