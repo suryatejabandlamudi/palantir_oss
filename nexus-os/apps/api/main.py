@@ -6,23 +6,19 @@ from sqlalchemy import or_, and_
 from typing import List, Dict, Any
 import json
 
-import models
-import schemas
-from vector_store import vector_store
-from duckdb_client import duck_db
-from pipeline_engine import pipeline_engine
-from duckdb_client import duck_db
-from pipeline_engine import pipeline_engine
-import requests
+from .vector_store import vector_store
+from .duckdb_client import duck_db
+from .pipeline_engine import pipeline_engine
 from jose import JWTError, jwt
-from database import get_db, engine
+from . import models, schemas, auth
+from .database import engine, get_db
 import sys
 import os
 
 # Add parent directory to path to allow importing from agent
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
 
-from agent.llm import GeminiClient
+from agent.llm import get_llm_client
 from agent.tools import registry
 from agent.rbac import UserRole
 
@@ -42,7 +38,7 @@ app.add_middleware(
 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import timedelta
-import auth
+from . import auth
 
 # --- Auth Setup ---
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -307,7 +303,7 @@ def execute_action(execution: schemas.ActionExecutionCreate, db: Session = Depen
     db.refresh(db_exec)
     return db_exec
 
-import aip_tools
+from . import aip_tools
 
 @app.post("/aip/chat")
 def aip_chat(query: Dict[str, str] = Body(...)):
@@ -347,65 +343,81 @@ def aip_chat(query: Dict[str, str] = Body(...)):
     
     full_prompt = f"User: {user_prompt}\n\nAIP:"
     
-    # 4. Call Local LLM (Ollama)
+    # 4. Call LLM (Unified Client)
     try:
-        # Using Ollama directly as it's verified running on 11434
-        response = requests.post(
-            "http://localhost:11434/api/chat",
-            json={
-                "model": "gpt-oss:20b", # Using the model found in curl
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": full_prompt}
-                ],
-                "stream": False,
-                "options": {
-                    "temperature": 0.1
-                }
-            },
-            timeout=60
-        )
-        response.raise_for_status()
-        ai_text = response.json()['message']['content']
+        llm_client = get_llm_client()
+        
+        # Construct history for the client
+        history = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": full_prompt}
+        ]
+        
+        response = llm_client.generate_response(history=history)
+        ai_text = response["content"]
         
         # 5. Check for Tool Call
         structured_data = {}
-        try:
-            # Heuristic: Try to parse JSON from the response
-            clean_text = ai_text.strip()
-            if clean_text.startswith("```json"):
-                clean_text = clean_text[7:-3]
-            elif clean_text.startswith("```"):
-                clean_text = clean_text[3:-3]
+        
+        # If the client returns tool calls directly (Gemini style or parsed Ollama)
+        if response.get("tool_calls"):
+            for tool_call in response["tool_calls"]:
+                tool_name = tool_call["name"]
+                tool_args = tool_call["arguments"]
                 
-            tool_call = json.loads(clean_text)
-            
-            if "tool" in tool_call and tool_call["tool"] in aip_tools.AVAILABLE_TOOLS:
-                tool_name = tool_call["tool"]
-                tool_args = tool_call.get("args", {})
-                
-                # Execute Tool
-                tool_func = aip_tools.AVAILABLE_TOOLS[tool_name]
-                if tool_name == "analyze_impact":
-                    result = tool_func(tool_args.get("disruption_name"))
-                elif tool_name == "run_sql_query":
-                    result = tool_func(tool_args.get("sql"))
-                elif tool_name == "create_alert":
-                    result = tool_func(tool_args.get("severity"), tool_args.get("title"), tool_args.get("message"))
-                else:
-                    result = tool_func()
+                if tool_name in aip_tools.AVAILABLE_TOOLS:
+                     # Execute Tool
+                    tool_func = aip_tools.AVAILABLE_TOOLS[tool_name]
+                    if tool_name == "analyze_impact":
+                        result = tool_func(tool_args.get("disruption_name"))
+                    elif tool_name == "run_sql_query":
+                        result = tool_func(tool_args.get("sql"))
+                    elif tool_name == "create_alert":
+                        result = tool_func(tool_args.get("severity"), tool_args.get("title"), tool_args.get("message"))
+                    else:
+                        result = tool_func()
+                        
+                    structured_data["tool_result"] = result
+                    structured_data["tool_name"] = tool_name
                     
-                structured_data["tool_result"] = result
-                structured_data["tool_name"] = tool_name
+                    ai_text = f"Executed {tool_name}. Result: {json.dumps(result, default=str)[:200]}..."
+        
+        # Fallback: Heuristic parsing if tool_calls is empty but text contains JSON (Ollama raw)
+        elif not response.get("tool_calls"):
+             try:
+                clean_text = ai_text.strip()
+                if clean_text.startswith("```json"):
+                    clean_text = clean_text[7:-3]
+                elif clean_text.startswith("```"):
+                    clean_text = clean_text[3:-3]
+                    
+                tool_call = json.loads(clean_text)
                 
-                ai_text = f"Executed {tool_name}. Result: {json.dumps(result, default=str)[:200]}..."
-                
-        except json.JSONDecodeError:
-            pass
-            
+                if "tool" in tool_call and tool_call["tool"] in aip_tools.AVAILABLE_TOOLS:
+                    tool_name = tool_call["tool"]
+                    tool_args = tool_call.get("args", {})
+                    
+                    # Execute Tool
+                    tool_func = aip_tools.AVAILABLE_TOOLS[tool_name]
+                    if tool_name == "analyze_impact":
+                        result = tool_func(tool_args.get("disruption_name"))
+                    elif tool_name == "run_sql_query":
+                        result = tool_func(tool_args.get("sql"))
+                    elif tool_name == "create_alert":
+                        result = tool_func(tool_args.get("severity"), tool_args.get("title"), tool_args.get("message"))
+                    else:
+                        result = tool_func()
+                        
+                    structured_data["tool_result"] = result
+                    structured_data["tool_name"] = tool_name
+                    
+                    ai_text = f"Executed {tool_name}. Result: {json.dumps(result, default=str)[:200]}..."
+             except:
+                 pass
+
     except Exception as e:
         print(f"LLM Error: {e}")
-        ai_text = f"AIP Error: Could not connect to Local LLM. Details: {str(e)}"
+        ai_text = f"AIP Error: Could not connect to LLM. Details: {str(e)}"
 
     return {
         "text": ai_text,
@@ -435,7 +447,7 @@ def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
         except ValueError:
             user_role = UserRole.ADMIN # Default fallback
             
-        gemini = GeminiClient()
+        llm_client = get_llm_client()
         
         # 2. Retrieve RAG Context
         # Search for relevant objects/docs in vector store
@@ -468,8 +480,8 @@ def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
         # Add system prompt to history
         full_history = [{"role": "user", "content": system_prompt}] + request.history + [{"role": "user", "content": request.message}]
         
-        # 5. Call Gemini
-        response = gemini.generate_response(history=full_history, tools=tools)
+        # 5. Call LLM
+        response = llm_client.generate_response(history=full_history, tools=tools)
         
         final_content = response["content"]
         tool_calls_result = []

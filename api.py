@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
-from agent.llm import GeminiClient
+from agent.llm import get_llm_client
 from agent.tools import registry
 from agent.rbac import UserRole
 import agent.integrated_tools # Trigger registration
@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 # Initialize Core Components
-llm_client = GeminiClient()
+llm_client = get_llm_client()
 # registry is already initialized in agent.tools
 
 class ChatRequest(BaseModel):

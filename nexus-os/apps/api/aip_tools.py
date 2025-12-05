@@ -1,5 +1,5 @@
 import json
-from duckdb_client import duck_db
+from .duckdb_client import duck_db
 from pipeline_engine import pipeline_engine
 
 def query_ontology(query: str = None):

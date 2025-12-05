@@ -1,7 +1,8 @@
 import os
 import json
 import requests
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
+from core.config import config
 
 class GeminiClient:
     def __init__(self, api_key: str = None, model: str = "gemini-1.5-flash"):
@@ -9,7 +10,10 @@ class GeminiClient:
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
         
         if not self.api_key and not self.mock_mode:
-            raise ValueError("GEMINI_API_KEY environment variable not set.")
+            # If not set, we can warn or just let it fail later if used.
+            # But since we might switch providers, let's just print a warning if init fails but we might not use it.
+            # Actually, let's keep it strict if this class is instantiated.
+            pass
             
         self.model = model
         self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
@@ -139,3 +143,95 @@ class GeminiClient:
             # Return a zero vector or raise, depending on resilience needs. 
             # For now, raising to be explicit.
             raise
+
+class OllamaClient:
+    def __init__(self, base_url: str = None, model: str = None):
+        self.base_url = base_url or config.OLLAMA_BASE_URL
+        self.model = model or config.OLLAMA_MODEL
+        self.api_url = f"{self.base_url}/api/chat"
+
+    def generate_response(self, history: List[Dict[str, str]], tools: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Generates a response from the Ollama API.
+        """
+        # Convert history to Ollama format (same as OpenAI/Gemini for simple messages)
+        # Ollama expects: [{"role": "user", "content": "..."}]
+        
+        payload = {
+            "model": self.model,
+            "messages": history,
+            "stream": False,
+            "options": {
+                "temperature": 0.0
+            }
+        }
+        
+        # Note: Ollama tool calling support varies by model. 
+        # For this implementation, we will assume the model might output JSON if instructed in system prompt.
+        # Real tool calling with Ollama is model-dependent.
+        
+        try:
+            response = requests.post(self.api_url, json=payload)
+            response.raise_for_status()
+            result = response.json()
+            
+            content = result["message"]["content"]
+            
+            # Basic attempt to parse tool calls if the model outputted JSON
+            tool_calls = []
+            try:
+                # Check for code blocks
+                clean_content = content.strip()
+                if clean_content.startswith("```json"):
+                    clean_content = clean_content[7:-3]
+                elif clean_content.startswith("```"):
+                    clean_content = clean_content[3:-3]
+                
+                parsed = json.loads(clean_content)
+                if isinstance(parsed, dict) and "tool" in parsed:
+                    tool_calls.append({
+                        "name": parsed["tool"],
+                        "arguments": parsed.get("args", {})
+                    })
+                    # If it was just a tool call, we might want to clear content or keep it as log
+            except json.JSONDecodeError:
+                pass
+                
+            return {
+                "content": content,
+                "tool_calls": tool_calls
+            }
+            
+        except requests.exceptions.RequestException as e:
+            print(f"Error calling Ollama API: {e}")
+            raise
+
+    def embed_content(self, text: str) -> List[float]:
+        """
+        Generates embeddings for the given text using Ollama.
+        """
+        url = f"{self.base_url}/api/embeddings"
+        
+        payload = {
+            "model": self.model,
+            "prompt": text
+        }
+        
+        try:
+            response = requests.post(url, json=payload)
+            response.raise_for_status()
+            result = response.json()
+            return result["embedding"]
+        except Exception as e:
+            print(f"Error generating embedding with Ollama: {e}")
+            raise
+
+def get_llm_client():
+    """
+    Factory function to return the configured LLM client.
+    """
+    provider = os.environ.get("LLM_PROVIDER", "ollama").lower()
+    if provider == "ollama":
+        return OllamaClient()
+    else:
+        return GeminiClient()

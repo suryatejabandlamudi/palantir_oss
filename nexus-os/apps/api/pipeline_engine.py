@@ -3,7 +3,7 @@ import pandas as pd
 import io
 import sys
 from typing import Any, Dict
-from duckdb_client import duck_db
+from .duckdb_client import duck_db
 
 class PipelineEngine:
     def execute_pipeline(self, code: str, input_types: list[str], output_type: str) -> Dict[str, Any]:
