@@ -30,9 +30,10 @@ class SupplyChainAgent:
             "crm_get_commit_forecast": self.sfdc.execute_tool
         }
 
-    def run(self, event: Dict[str, Any]):
-        print(f"--- Supply Chain Agent Received Event: {event['event_type']} ---")
-        print(f"Payload: {json.dumps(event['payload'], indent=2)}")
+    def run(self, event: Dict[str, Any]) -> Dict[str, Any]:
+        logs = []
+        logs.append(f"--- Supply Chain Agent Received Event: {event['event_type']} ---")
+        logs.append(f"Payload: {json.dumps(event['payload'], indent=2)}")
         
         # Construct initial prompt
         history = [
@@ -55,40 +56,59 @@ class SupplyChainAgent:
         ]
         
         max_turns = 5
+        execution_trace = []
+        
         for i in range(max_turns):
-            print(f"\n--- Turn {i+1} ---")
+            turn_log = {"turn": i + 1, "actions": []}
+            logs.append(f"\n--- Turn {i+1} ---")
+            
             response = self.llm.generate_response(history, self.tools)
             
             content = response.get("content", "")
             if content:
-                print(f"Agent: {content}")
+                logs.append(f"Agent: {content}")
+                turn_log["thought"] = content
                 history.append({"role": "model", "content": content})
                 
             tool_calls = response.get("tool_calls", [])
             if not tool_calls:
-                print("No more actions needed.")
+                logs.append("No more actions needed.")
+                turn_log["status"] = "completed"
+                execution_trace.append(turn_log)
                 break
                 
             for tool_call in tool_calls:
                 name = tool_call["name"]
                 args = tool_call["arguments"]
-                print(f"Executing Tool: {name} with args: {args}")
+                logs.append(f"Executing Tool: {name} with args: {args}")
                 
                 # Execute tool
                 try:
-                    # Note: The execute_tool method signature varies slightly, adapting here
                     if name in self.tool_map:
-                        # We need to pass tool_name as first arg to the connector's execute_tool
                         result = self.tool_map[name](name, **args)
                     else:
                         result = f"Error: Tool {name} not found locally."
                 except Exception as e:
                     result = f"Error executing {name}: {str(e)}"
                 
-                print(f"Tool Result: {json.dumps(result, default=str)}")
+                logs.append(f"Tool Result: {json.dumps(result, default=str)}")
+                
+                turn_log["actions"].append({
+                    "tool": name,
+                    "args": args,
+                    "result": result
+                })
                 
                 # Add result to history
                 history.append({
                     "role": "user",
                     "content": f"Tool '{name}' returned: {json.dumps(result, default=str)}"
                 })
+            
+            execution_trace.append(turn_log)
+            
+        return {
+            "status": "success",
+            "logs": logs,
+            "trace": execution_trace
+        }

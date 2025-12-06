@@ -34,8 +34,9 @@ class HRAgent:
             "search_knowledge_base": self.evidencer.search
         }
 
-    def run(self, prompt: str):
-        print(f"--- HR Agent Received Prompt: {prompt} ---")
+    def run(self, prompt: str) -> Dict[str, Any]:
+        logs = []
+        logs.append(f"--- HR Agent Received Prompt: {prompt} ---")
         
         history = [
             {
@@ -55,24 +56,31 @@ class HRAgent:
         ]
         
         max_turns = 5
+        execution_trace = []
+        
         for i in range(max_turns):
-            print(f"\n--- Turn {i+1} ---")
+            turn_log = {"turn": i + 1, "actions": []}
+            logs.append(f"\n--- Turn {i+1} ---")
+            
             response = self.llm.generate_response(history, self.tools)
             
             content = response.get("content", "")
             if content:
-                print(f"Agent: {content}")
+                logs.append(f"Agent: {content}")
+                turn_log["thought"] = content
                 history.append({"role": "model", "content": content})
                 
             tool_calls = response.get("tool_calls", [])
             if not tool_calls:
-                print("No more actions needed.")
+                logs.append("No more actions needed.")
+                turn_log["status"] = "completed"
+                execution_trace.append(turn_log)
                 break
                 
             for tool_call in tool_calls:
                 name = tool_call["name"]
                 args = tool_call["arguments"]
-                print(f"Executing Tool: {name} with args: {args}")
+                logs.append(f"Executing Tool: {name} with args: {args}")
                 
                 try:
                     if name in self.tool_map:
@@ -85,9 +93,23 @@ class HRAgent:
                 except Exception as e:
                     result = f"Error executing {name}: {str(e)}"
                 
-                print(f"Tool Result: {json.dumps(result, default=str)}")
+                logs.append(f"Tool Result: {json.dumps(result, default=str)}")
+                
+                turn_log["actions"].append({
+                    "tool": name,
+                    "args": args,
+                    "result": result
+                })
                 
                 history.append({
                     "role": "user",
                     "content": f"Tool '{name}' returned: {json.dumps(result, default=str)}"
                 })
+            
+            execution_trace.append(turn_log)
+            
+        return {
+            "status": "success",
+            "logs": logs,
+            "trace": execution_trace
+        }

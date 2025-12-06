@@ -45,6 +45,19 @@ Before selling, you must verify that the 4 "Hero Wedges" are functioning correct
     *   Agent identifies **Sarah Connor** as high risk.
     *   Agent notifies her manager with a policy-backed intervention plan.
 
+    *   Agent notifies her manager with a policy-backed intervention plan.
+
+### 5. API Integration (Nexus OS Backend)
+*   **Value Prop:** "Seamlessly integrate these agents into your existing portals via REST API."
+*   **Endpoints:**
+    *   `POST /agents/supply-chain/run`
+    *   `POST /agents/cfo/run`
+    *   `POST /agents/cto/run`
+    *   `POST /agents/hr/run`
+*   **Verification:**
+    *   Start the API: `cd nexus-os/apps && uvicorn api.main:app --port 8000`
+    *   The agents return full execution traces in JSON format for UI rendering.
+
 ---
 
 ## Phase 2: Production Readiness (Real Integrations)

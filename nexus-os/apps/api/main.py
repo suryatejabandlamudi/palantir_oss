@@ -1,3 +1,8 @@
+import sys
+import os
+
+# Add parent directory to path to allow importing from agent
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
 
 from fastapi import FastAPI, Depends, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,18 +10,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from typing import List, Dict, Any
 import json
+from pydantic import BaseModel
 
 from .vector_store import vector_store
 from .duckdb_client import duck_db
 from .pipeline_engine import pipeline_engine
 from jose import JWTError, jwt
-from . import models, schemas, auth
+from . import models, schemas, auth, agents_router
 from .database import engine, get_db
-import sys
-import os
-
-# Add parent directory to path to allow importing from agent
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
 
 from agent.llm import get_llm_client
 from agent.tools import registry
@@ -36,31 +37,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+app.include_router(agents_router.router)
+
+from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from . import auth
 
 # --- Auth Setup ---
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = schemas.TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    user = db.query(models.User).filter(models.User.username == token_data.username).first()
-    if user is None:
-        raise credentials_exception
-    return user
+# oauth2_scheme and get_current_user are now in auth.py
 
 @app.post("/token", response_model=schemas.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -78,7 +62,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/users/me", response_model=schemas.User)
-async def read_users_me(current_user: models.User = Depends(get_current_user)):
+async def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
     return current_user
 
 @app.post("/users", response_model=schemas.User)
