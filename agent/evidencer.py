@@ -35,7 +35,7 @@ class Evidencer:
         results = []
 
         # CTO Scenario: Release Risk
-        if "rollback" in query_lower or "policy" in query_lower or "deploy" in query_lower:
+        if "rollback" in query_lower or "deployment policy" in query_lower or "deploy" in query_lower:
             results.append({
                 "id": "DOC-POL-001",
                 "content": "Deployment Policy v2.1: All production changes must have a tested rollback plan. Changes with risk score > 7 require VP approval.",
@@ -48,7 +48,7 @@ class Evidencer:
             })
 
         # HR Scenario: Burnout
-        if "burnout" in query_lower or "policy" in query_lower or "leave" in query_lower:
+        if "burnout" in query_lower or "hr policy" in query_lower or "leave" in query_lower:
              results.append({
                 "id": "DOC-HR-003",
                 "content": "Employee Well-being Policy: Managers must intervene if an employee has not taken leave for 4 consecutive months.",

@@ -35,7 +35,7 @@ class GeminiClient:
                         {"name": "search_knowledge_base", "arguments": {"query": "burnout policy"}}
                     ]
                 }
-            elif "wd_get_team_timeoff" in last_msg or "search_knowledge_base" in last_msg:
+            elif "wd_get_team_timeoff" in last_msg or ("search_knowledge_base" in last_msg and ("well-being" in last_msg or "leave" in last_msg)):
                  return {
                     "content": "Sarah Connor has 120 hours of leave balance and hasn't taken leave since May. I should check her meeting load.",
                     "tool_calls": [
@@ -70,7 +70,7 @@ class GeminiClient:
                         {"name": "search_knowledge_base", "arguments": {"query": "deployment rollback policy"}}
                     ]
                 }
-            elif "jira_get_risky_changes" in last_msg: # Removed OR search_knowledge_base to be safer
+            elif "jira_get_risky_changes" in last_msg or ("search_knowledge_base" in last_msg and "rollback" in last_msg):
                  return {
                     "content": "I found a high-risk change (PROJ-101) 'Migrate User DB' with Risk Score 9 and NO rollback plan. The policy requires a rollback plan for high-risk changes. I must block this.",
                     "tool_calls": [
