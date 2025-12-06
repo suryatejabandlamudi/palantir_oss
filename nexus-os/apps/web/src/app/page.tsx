@@ -1,4 +1,5 @@
 import { ChatWidget } from "../components/ChatWidget";
+import { AgentSimulationPanel } from "../components/AgentSimulationPanel";
 
 export default function Home() {
   return (
@@ -42,19 +43,8 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Placeholder Content */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-8 min-h-[400px] flex items-center justify-center border-dashed">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full mx-auto flex items-center justify-center">
-                <span className="text-2xl">📊</span>
-              </div>
-              <h3 className="text-lg font-medium text-zinc-900 dark:text-white">Analytics Dashboard</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
-                Select a module from the sidebar to view detailed analytics.
-                Or ask the <strong>Nexus Agent</strong> to pull specific reports for you.
-              </p>
-            </div>
-          </div>
+          {/* Agent Simulation Panel */}
+          <AgentSimulationPanel />
         </div>
       </main>
 

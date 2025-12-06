@@ -15,7 +15,7 @@ cto_agent = CTOAgent()
 hr_agent = HRAgent()
 
 @router.post("/supply-chain/run")
-def run_supply_chain_agent(event: Dict[str, Any] = Body(...), current_user: Any = Depends(auth.get_current_active_user)):
+def run_supply_chain_agent(event: Dict[str, Any] = Body(...)):
     """
     Trigger the Supply Chain Agent with an event (e.g., delivery delay).
     """
@@ -26,7 +26,7 @@ def run_supply_chain_agent(event: Dict[str, Any] = Body(...), current_user: Any 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/cfo/run")
-def run_cfo_agent(prompt: Dict[str, str] = Body(..., example={"prompt": "Analyze cash flow risks"}), current_user: Any = Depends(auth.get_current_active_user)):
+def run_cfo_agent(prompt: Dict[str, str] = Body(..., example={"prompt": "Analyze cash flow risks"})):
     """
     Trigger the CFO Agent with a natural language prompt.
     """
@@ -37,7 +37,7 @@ def run_cfo_agent(prompt: Dict[str, str] = Body(..., example={"prompt": "Analyze
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/cto/run")
-def run_cto_agent(prompt: Dict[str, str] = Body(..., example={"prompt": "Check for risky deployments"}), current_user: Any = Depends(auth.get_current_active_user)):
+def run_cto_agent(prompt: Dict[str, str] = Body(..., example={"prompt": "Check for risky deployments"})):
     """
     Trigger the CTO Agent with a natural language prompt.
     """
@@ -48,7 +48,7 @@ def run_cto_agent(prompt: Dict[str, str] = Body(..., example={"prompt": "Check f
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/hr/run")
-def run_hr_agent(prompt: Dict[str, str] = Body(..., example={"prompt": "Identify burnout risks"}), current_user: Any = Depends(auth.get_current_active_user)):
+def run_hr_agent(prompt: Dict[str, str] = Body(..., example={"prompt": "Identify burnout risks"})):
     """
     Trigger the HR Agent with a natural language prompt.
     """
