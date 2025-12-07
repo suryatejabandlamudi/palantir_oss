@@ -1,5 +1,5 @@
 from rag.store import VectorStore
-from agent.tools import ToolRegistry
+from nexus_os.apps.aip.agent_runtime.tools import ToolRegistry
 
 def ingest_knowledge_base():
     """

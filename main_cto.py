@@ -1,4 +1,4 @@
-from agent.cto_agent import CTOAgent
+from nexus_os.apps.aip.agent_runtime.cto_agent import CTOAgent
 
 def main():
     print("Initializing Enterprise Process Brain - CTO Release-Risk Gate...")

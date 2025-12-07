@@ -1,4 +1,4 @@
-from agent.cfo_agent import CFOAgent
+from nexus_os.apps.aip.agent_runtime.cfo_agent import CFOAgent
 
 def main():
     print("Initializing Enterprise Process Brain - CFO Cash-Conversion Cockpit...")

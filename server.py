@@ -1,5 +1,5 @@
 from fastmcp import FastMCP
-from agent.tools import ToolRegistry
+from nexus_os.apps.aip.agent_runtime.tools import ToolRegistry
 
 # Initialize FastMCP server
 mcp = FastMCP("Palantir OSS Integrations")

@@ -1,4 +1,4 @@
-from agent.hr_agent import HRAgent
+from nexus_os.apps.aip.agent_runtime.hr_agent import HRAgent
 
 def main():
     print("Initializing Enterprise Process Brain - HR Attrition Radar...")

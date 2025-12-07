@@ -8,7 +8,7 @@ def test_integrations():
     print("Testing Integrations...")
     
     try:
-        from integrations.erp.client import ERPConnector
+        from nexus_os.core.integrations.erp.client import ERPConnector
         print("ERPConnector imported.")
         erp = ERPConnector()
         print("ERPConnector instantiated.")
@@ -16,7 +16,7 @@ def test_integrations():
         print(f"ERPConnector Failed: {e}")
 
     try:
-        from integrations.crm.client import CRMConnector
+        from nexus_os.core.integrations.crm.client import CRMConnector
         print("CRMConnector imported.")
         crm = CRMConnector()
         print("CRMConnector instantiated.")
@@ -24,7 +24,7 @@ def test_integrations():
         print(f"CRMConnector Failed: {e}")
 
     try:
-        from integrations.hris.client import HRISConnector
+        from nexus_os.core.integrations.hris.client import HRISConnector
         print("HRISConnector imported.")
         hris = HRISConnector()
         print("HRISConnector instantiated.")
@@ -32,7 +32,7 @@ def test_integrations():
         print(f"HRISConnector Failed: {e}")
 
     try:
-        from integrations.itsm.client import ITSMConnector
+        from nexus_os.core.integrations.itsm.client import ITSMConnector
         print("ITSMConnector imported.")
         itsm = ITSMConnector()
         print("ITSMConnector instantiated.")
@@ -40,7 +40,7 @@ def test_integrations():
         print(f"ITSMConnector Failed: {e}")
 
     try:
-        from integrations.data.snowflake import SnowflakeConnector
+        from nexus_os.core.integrations.data.snowflake import SnowflakeConnector
         print("SnowflakeConnector imported.")
         sf = SnowflakeConnector()
         print("SnowflakeConnector instantiated.")
@@ -48,7 +48,7 @@ def test_integrations():
         print(f"SnowflakeConnector Failed: {e}")
 
     try:
-        from integrations.data.storage import StorageConnector
+        from nexus_os.core.integrations.data.storage import StorageConnector
         print("StorageConnector imported.")
         storage = StorageConnector()
         print("StorageConnector instantiated.")
@@ -56,7 +56,7 @@ def test_integrations():
         print(f"StorageConnector Failed: {e}")
 
     try:
-        from integrations.comms.teams import TeamsConnector
+        from nexus_os.core.integrations.comms.teams import TeamsConnector
         print("TeamsConnector imported.")
         teams = TeamsConnector()
         print("TeamsConnector instantiated.")
@@ -64,7 +64,7 @@ def test_integrations():
         print(f"TeamsConnector Failed: {e}")
 
     try:
-        from integrations.comms.slack import SlackConnector
+        from nexus_os.core.integrations.comms.slack import SlackConnector
         print("SlackConnector imported.")
         slack = SlackConnector()
         print("SlackConnector instantiated.")
@@ -72,7 +72,7 @@ def test_integrations():
         print(f"SlackConnector Failed: {e}")
 
     try:
-        from integrations.knowledge.sharepoint import SharePointConnector
+        from nexus_os.core.integrations.knowledge.sharepoint import SharePointConnector
         print("SharePointConnector imported.")
         sp = SharePointConnector()
         print("SharePointConnector instantiated.")
@@ -80,7 +80,7 @@ def test_integrations():
         print(f"SharePointConnector Failed: {e}")
 
     try:
-        from integrations.knowledge.confluence import ConfluenceConnector
+        from nexus_os.core.integrations.knowledge.confluence import ConfluenceConnector
         print("ConfluenceConnector imported.")
         conf = ConfluenceConnector()
         print("ConfluenceConnector instantiated.")
@@ -88,7 +88,7 @@ def test_integrations():
         print(f"ConfluenceConnector Failed: {e}")
 
     try:
-        from integrations.knowledge.jira import JiraConnector
+        from nexus_os.core.integrations.knowledge.jira import JiraConnector
         print("JiraConnector imported.")
         jira = JiraConnector()
         print("JiraConnector instantiated.")

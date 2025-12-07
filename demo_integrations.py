@@ -7,13 +7,13 @@ from unittest.mock import MagicMock, patch
 # Add project root to path
 sys.path.append(os.getcwd())
 
-from integrations.erp.client import ERPConnector
-from integrations.crm.client import CRMConnector
-from integrations.hris.client import HRISConnector
-from integrations.itsm.client import ITSMConnector
-from integrations.comms.teams import TeamsConnector
-from integrations.comms.slack import SlackConnector
-from integrations.data.snowflake import SnowflakeConnector
+from nexus_os.core.integrations.erp.client import ERPConnector
+from nexus_os.core.integrations.crm.client import CRMConnector
+from nexus_os.core.integrations.hris.client import HRISConnector
+from nexus_os.core.integrations.itsm.client import ITSMConnector
+from nexus_os.core.integrations.comms.teams import TeamsConnector
+from nexus_os.core.integrations.comms.slack import SlackConnector
+from nexus_os.core.integrations.data.snowflake import SnowflakeConnector
 
 # --- Mock Data ---
 MOCK_DATA = {

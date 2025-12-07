@@ -1,5 +1,5 @@
 import sys
-from agent.graph import Agent
+from nexus_os.apps.aip.agent_runtime.graph import Agent
 
 def main():
     print("Initializing Palantir OSS Agent...")

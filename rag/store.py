@@ -5,7 +5,7 @@ except ImportError:
 
 import uuid
 from typing import List, Dict, Any, Optional
-from agent.llm import GeminiClient
+from nexus_os.apps.aip.agent_runtime.llm import GeminiClient
 
 class VectorStore:
     def __init__(self, collection_name: str = "palantir_knowledge"):

@@ -4,9 +4,9 @@ from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
-from agent.llm import get_llm_client
-from agent.tools import registry
-from agent.rbac import UserRole
+from nexus_os.apps.aip.agent_runtime.llm import get_llm_client
+from nexus_os.apps.aip.agent_runtime.tools import registry
+from nexus_os.apps.aip.agent_runtime.rbac import UserRole
 import agent.integrated_tools # Trigger registration
 
 app = FastAPI(title="Palantir OSS - Nexus OS API")

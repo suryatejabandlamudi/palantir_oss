@@ -1,4 +1,4 @@
-from agent.supply_chain_agent import SupplyChainAgent
+from nexus_os.apps.aip.agent_runtime.supply_chain_agent import SupplyChainAgent
 import datetime
 
 def main():

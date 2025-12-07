@@ -1,6 +1,6 @@
 import os
 import sys
-from agent.llm import get_llm_client, OllamaClient, GeminiClient
+from nexus_os.apps.aip.agent_runtime.llm import get_llm_client, OllamaClient, GeminiClient
 from core.config import config
 
 def test_llm_switch():
