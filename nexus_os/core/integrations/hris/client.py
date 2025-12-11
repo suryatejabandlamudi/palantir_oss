@@ -1,8 +1,8 @@
 from typing import List, Dict, Any
 from nexus_os.core.integrations.base import BaseConnector
-from core.client import APIClient
-from core.auth import OAuth2ClientCredentialsProvider
-from core.config import config
+from nexus_os.core.client import APIClient
+from nexus_os.core.auth import OAuth2ClientCredentialsProvider
+from nexus_os.core.config import config
 
 class HRISConnector(BaseConnector):
     """
@@ -11,21 +11,19 @@ class HRISConnector(BaseConnector):
 
     def __init__(self):
         super().__init__()
-        if config.WD_CLIENT_ID and config.WD_CLIENT_SECRET:
+        if config.WORKDAY_CLIENT_ID and config.WORKDAY_CLIENT_SECRET:
             # Workday OAuth2 Token URL
-            token_url = f"{config.WD_AUTH_URL}/token"
+            token_url = f"{config.WORKDAY_AUTH_URL}/token"
             
             self.auth = OAuth2ClientCredentialsProvider(
                 token_url=token_url,
-                client_id=config.WD_CLIENT_ID,
-                client_secret=config.WD_CLIENT_SECRET
+                client_id=config.WORKDAY_CLIENT_ID,
+                client_secret=config.WORKDAY_CLIENT_SECRET
             )
             
             # Base URL for Workday REST API
-            # Format: https://wd2-impl-services1.workday.com/ccx/service/customreport2/{tenant}/{user}/{report_name}
-            # Or standard REST API: https://{host}/ccx/api/v1/{tenant}
             self.client = APIClient(
-                base_url=f"{config.WD_API_URL}/ccx/api/v1/{config.WD_TENANT}",
+                base_url=f"{config.WORKDAY_API_URL}/ccx/api/v1/{config.WORKDAY_TENANT}",
                 auth_provider=self.auth
             )
         else:

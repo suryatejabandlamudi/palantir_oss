@@ -1,14 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #10161a;
-  --foreground: #bfccd6;
-  --primary: #2d72d2;
-  --primary-hover: #106ba3;
-  --border: #293742;
-  --surface: #182026;
-  --surface-hover: #202b33;
-  --text-muted: #8a9ba8;
+  /* Premium Light Theme (Clean, Enterprise, Polished) */
+  --background: #ffffff; /* Pure White */
+  --foreground: #18181b; /* Zinc 950 - Deep Black Text */
+  
+  --primary: #2563eb; /* Blue 600 - Professional Blue */
+  --primary-glow: rgba(37, 99, 235, 0.2);
+  
+  --surface: #f4f4f5; /* Zinc 100 - Light Grey Surface */
+  --surface-hover: #e4e4e7; /* Zinc 200 */
+  
+  --border: #e4e4e7; /* Zinc 200 - Solid Light Border */
+  --border-hover: #d4d4d8; /* Zinc 300 */
+  
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: 1px solid rgba(0, 0, 0, 0.05);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 body {
@@ -16,62 +24,109 @@ body {
   background: var(--background);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  /* Subtle light gradient */
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.03), transparent 40%),
+    radial-gradient(circle at 80% 10%, rgba(124, 58, 237, 0.03), transparent 30%);
 }
 
 * {
   box-sizing: border-box;
-  border-color: var(--border);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
-/* Utility classes for "Vanilla" usage */
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(37, 99, 235, 0.3); /* Slight blue hint on hover */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Base Components Overrides */
 .btn {
-  background: var(--surface);
+  background: white;
   border: 1px solid var(--border);
   color: var(--foreground);
-  padding: 6px 12px;
-  border-radius: 3px;
+  padding: 8px 16px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: background 0.1s;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .btn:hover {
-  background: var(--surface-hover);
+  background: var(--surface);
+  border-color: var(--border-hover);
 }
 
 .btn-primary {
   background: var(--primary);
   color: white;
-  border: none;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 4px var(--primary-glow);
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 8px var(--primary-glow);
 }
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 16px;
+/* Typography Polish */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em; /* Tight tracking for modern look */
+  color: #09090b; /* Zinc 950 */
 }
 
+/* Inputs */
 .input {
-  background: #202b33;
+  background: white;
   border: 1px solid var(--border);
   color: var(--foreground);
-  padding: 6px 10px;
-  border-radius: 3px;
+  padding: 8px 12px;
+  border-radius: 6px;
   width: 100%;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05) inset;
 }
 
 .input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 1px var(--primary);
+  box-shadow: 0 0 0 1px var(--primary), 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: white;
 }

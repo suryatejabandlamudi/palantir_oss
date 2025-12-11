@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, User, Bot, Sparkles, Briefcase, ChevronDown } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
+import { SmartCard } from "./SmartCard";
 import { twMerge } from "tailwind-merge";
 import axios from "axios";
 
@@ -48,7 +49,7 @@ export function ChatWidget() {
                 content: m.content
             }));
 
-            const response = await axios.post("http://localhost:8000/chat", {
+            const response = await axios.post("http://localhost:8001/chat", {
                 message: userMessage.content,
                 role: selectedRole,
                 history: history
@@ -165,10 +166,12 @@ export function ChatWidget() {
                                                 Actions Performed
                                             </div>
                                             {msg.tool_calls.map((tool, tIdx) => (
-                                                <div key={tIdx} className="text-xs font-mono bg-zinc-50 dark:bg-black/20 border border-zinc-100 dark:border-zinc-800 p-2 rounded-md text-zinc-600 dark:text-zinc-400 overflow-x-auto">
-                                                    <span className="text-blue-600 dark:text-blue-400 font-semibold">{tool.name}</span>
-                                                    <span className="opacity-50 mx-1">→</span>
-                                                    <span className="opacity-70">{JSON.stringify(tool.result || tool.args).slice(0, 50)}...</span>
+                                                <div key={tIdx} className="mt-2">
+                                                    <SmartCard
+                                                        toolName={tool.name}
+                                                        result={tool.result}
+                                                        args={tool.args}
+                                                    />
                                                 </div>
                                             ))}
                                         </div>

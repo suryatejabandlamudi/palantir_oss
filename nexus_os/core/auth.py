@@ -56,3 +56,33 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 async def get_current_active_user(current_user: models.User = Depends(get_current_user)):
     # In a real app, check if user is active
     return current_user
+
+# --- Client Auth Providers ---
+
+class AuthProvider:
+    def get_headers(self) -> dict:
+        return {}
+
+class BasicAuthProvider(AuthProvider):
+    def __init__(self, username: str, token: str):
+        self.username = username
+        self.token = token
+    
+    def get_headers(self) -> dict:
+        import base64
+        creds = f"{self.username}:{self.token}"
+        b64_creds = base64.b64encode(creds.encode()).decode()
+        return {"Authorization": f"Basic {b64_creds}"}
+
+class OAuth2ClientCredentialsProvider(AuthProvider):
+    def __init__(self, client_id: str, client_secret: str, token_url: str):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.token_url = token_url
+        self.access_token = None
+        
+    def get_headers(self) -> dict:
+        # Simplified: Just mock or return existing token
+        if self.access_token:
+            return {"Authorization": f"Bearer {self.access_token}"}
+        return {}

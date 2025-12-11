@@ -8,16 +8,16 @@ from fastapi import FastAPI, Depends, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import json
 from pydantic import BaseModel
 
 from nexus_os.core.vector_store import vector_store
 from nexus_os.core.duckdb_client import duck_db
-from .pipeline_engine import pipeline_engine
+from nexus_os.apps.api.pipeline_engine import pipeline_engine
 from jose import JWTError, jwt
 from nexus_os.core import models, schemas, auth
-from . import agents_router
+from nexus_os.apps.api import agents_router, enterprise_router, security_incident_router
 from nexus_os.core.database import engine, get_db
 
 from nexus_os.apps.aip.agent_runtime.llm import get_llm_client
@@ -39,6 +39,8 @@ app.add_middleware(
 )
 
 app.include_router(agents_router.router)
+app.include_router(enterprise_router.router)
+app.include_router(security_incident_router.router)
 
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta

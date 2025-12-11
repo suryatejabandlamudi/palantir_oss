@@ -114,6 +114,21 @@ class ActionExecution(Base):
     user_id = Column(String, default="system")
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
+class RiskSignal(Base):
+    """
+    Unified Risk Signal for cross-domain correlation.
+    """
+    __tablename__ = "risk_signals"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    source_system = Column(String) # e.g. "VendorRisk", "TravelOps", "ITIdentity"
+    entity_id = Column(String, index=True) # ID of the risk subject (User, Vendor, Shipment, IP)
+    entity_type = Column(String) # e.g. "Vendor", "User", "IP"
+    risk_score = Column(Integer) # 0-100
+    reason = Column(Text)
+    status = Column(String, default="ACTIVE") # ACTIVE, RESOLVED, IGNORED
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 # --- AIP Layer (Agents) ---
 
 class Agent(Base):

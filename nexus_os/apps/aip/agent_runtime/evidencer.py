@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from rag.store import VectorStore
-from core.config import config
+from nexus_os.core.config import config
 import uuid
 
 class Evidencer:

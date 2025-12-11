@@ -1,8 +1,8 @@
 from typing import List, Dict, Any
 from nexus_os.core.integrations.base import BaseConnector
-from core.client import APIClient
-from core.auth import AuthProvider
-from core.config import config
+from nexus_os.core.client import APIClient
+from nexus_os.core.auth import AuthProvider
+from nexus_os.core.config import config
 import json
 
 class SnowflakeAuthProvider(AuthProvider):

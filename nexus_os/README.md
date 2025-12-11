@@ -1,66 +1,52 @@
-# Nexus OS: Open Source Palantir Alternative
+# Nexus OS - Protocol-First Enterprise Operating System
 
-Nexus OS is a comprehensive, open-source operating system for the modern enterprise, designed to replicate the core capabilities of the Palantir ecosystem. It integrates data integration, decision-making, AI agents, and continuous delivery into a single, cohesive platform.
+> **The Central Nervous System for the Autonomous Enterprise.**
 
-## Core Products
+Nexus OS is a next-generation platform that unifies enterprise systems (SAP, Salesforce, ServiceNow, Workday) under a single "Protocol-Driven" architecture. It replaces manual handoffs and siloed workflows with AI Agents that strictly enforce business logic ("The Law").
 
-### 1. Foundry (Data Operations)
-The backbone of the enterprise. Foundry manages the **Ontology**, the semantic layer that maps data to real-world concepts.
-*   **Pipeline Builder**: Visual and code-based (Python/SQL) data transformation pipelines.
-*   **Object Explorer**: Dynamic interface to explore, filter, and analyze any object type in the Ontology.
-*   **Schema Evolution**: Automatically adapts the underlying DuckDB storage as your Ontology changes.
+## 🧠 Core Architecture: Protocol-First
 
-### 2. AIP (Artificial Intelligence Platform)
-The brain of the operation. AIP integrates Large Language Models (LLMs) directly with your data and operations.
-*   **Agent Studio**: Configure AI agents with specific tools and permissions.
-*   **Dynamic Context**: Injects the live Ontology schema into the LLM's context, allowing it to understand your specific data model.
-*   **Actionable AI**: Agents can query data (`query_ontology`), generate alerts (`create_alert`), and trigger pipelines.
+In Nexus OS, **Protocols are supreme**. They are the single source of truth for how the business operates.
 
-### 3. Gotham (Decision & Operations)
-The command center. Gotham provides a Common Operating Picture (COP) for mission-critical decisions.
-*   **Live Map**: Real-time visualization of geospatial assets (e.g., Vessels, Ports).
-*   **Mission Planning**: Interactive tools to draw zones, plan routes, and save mission overlays.
-*   **Simulation**: Built-in simulation engine to mimic live data feeds for testing and training.
+1.  **Define**: Protocols are defined in `lib/protocols.ts` (The Law).
+2.  **Enforce**: `agentCore.ts` (The Enforcer) uses **Gemini 3 Pro** to strictly follow these protocols.
+3.  **Execute**: Actions are executed against real 3rd-party APIs (ServiceNow, SAP, etc.) or simulated environments.
 
-### 4. Apollo (Continuous Delivery)
-The nervous system. Apollo manages the deployment and health of the software itself.
-*   **Hub-and-Spoke Architecture**: Manage deployments across multiple environments (Dev, Staging, Prod).
-*   **Orchestration**: Automated multi-stage deployment workflows (Download -> Verify -> Install -> Health Check).
-*   **Live Telemetry**: Real-time streaming of deployment logs and system health metrics.
+### The "Universal" Engine
+Unlike traditional automation, Nexus OS actions are not hardcoded scripts.
+1.  **Trigger**: An event occurs (e.g., "New Contractor in Workday").
+2.  **Context**: The system gathers relevant data.
+3.  **Agent Decision**: The AI Agent reviews the "Protocol" for that event.
+4.  **Strict Action**: The Agent selects the *only* allowed action from the protocol (e.g., "Draft Access Request"). It cannot hallucinate new actions.
 
-## Architecture
+## 🚀 Key Features
 
-*   **Backend**: Python (FastAPI), SQLAlchemy, DuckDB (Analytical Store), Celery (Async Tasks).
-*   **Frontend**: Next.js, React, Tailwind CSS, Deck.GL (Maps), Lucide Icons.
-*   **AI**: Ollama (Local LLM), LangChain (Orchestration).
+*   **Gemini 3.0 Integration**: Powered exclusively by Google's latest `gemini-3-pro-preview` model for superior reasoning.
+*   **20+ Enterprise Protocols**: Pre-built workflows for ITSM, SecOps, Revenue, and Supply Chain.
+*   **Strict Compliance**: Agents act as "Compliance Officers," ensuring every action is auditable and pre-approved by the protocol.
+*   **Real-Time War Rooms**: Dedicated interfaces for high-priority incidents (e.g., Security Containment).
 
-## Getting Started
+## 🛠️ Technical Stack
 
-### Prerequisites
-*   Python 3.9+
-*   Node.js 18+
-*   Ollama (running `gpt-oss:20b` or similar on port 11434)
+*   **Frontend**: Next.js 14, Tailwind CSS, Framer Motion
+*   **AI Runtime**: Google Gemini API (v1beta), Python/TypeScript SDKs
+*   **State Management**: Zustand (Protocol Store)
+*   **Backend**: Python (FastAPI/Flask) for heavy lifting, Next.js API Routes for Agent Orchestration
 
-### Installation
+## 📦 distinct Modules
 
-1.  **Backend**:
-    ```bash
-    cd apps/api
-    python -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    python main.py
-    ```
+*   **/gotham**: Security & Cyber Operations
+*   **/foundry**: Data Integration & Ontology
+*   **/itsm**: IT Service Management
+*   **/crm**: Customer & Revenue Operations
+*   **/erp**: Enterprise Resource Planning
 
-2.  **Frontend**:
-    ```bash
-    cd apps/web
-    npm install
-    npm run dev
-    ```
+## 🚀 Getting Started
 
-3.  **Access**:
-    Open `http://localhost:3000` to access the Nexus OS portal.
+1.  **Install Dependencies**: `npm install`
+2.  **Configure Environment**: Set `GOOGLE_API_KEY` (Gemini 3 enabled).
+3.  **Run Dev Server**: `npm run dev`
+4.  **Verify Protocols**: `npx tsx scripts/verify_protocols.ts`
 
-## License
-MIT
+---
+*Built for the Autonomous Future.*

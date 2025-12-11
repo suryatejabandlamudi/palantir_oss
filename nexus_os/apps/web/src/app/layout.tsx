@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "../components/Sidebar";
+import NavigationShell from "../components/NavigationShell";
 import { ChatWidget } from "../components/ChatWidget";
 
 export const metadata: Metadata = {
@@ -8,19 +8,26 @@ export const metadata: Metadata = {
   description: "Palantir Ecosystem Replica",
 };
 
+import NexusConnect from "@/components/collaboration/NexusConnect";
+import ThinkingIndicator from "@/components/ui/ThinkingIndicator";
+import { ThinkingProvider } from "@/components/ui/ThinkingContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <Sidebar />
-        <main style={{ marginLeft: '60px', minHeight: '100vh', background: '#10161a' }}>
-          {children}
-        </main>
-        <ChatWidget />
+        <ThinkingProvider>
+          <NavigationShell>
+            {children}
+          </NavigationShell>
+          <NexusConnect />
+          <ThinkingIndicator />
+          <ChatWidget />
+        </ThinkingProvider>
       </body>
     </html>
   );

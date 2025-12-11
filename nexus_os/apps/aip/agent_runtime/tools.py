@@ -6,6 +6,10 @@ class ToolRegistry:
     def __init__(self):
         self._tools: Dict[str, Dict[str, Any]] = {}
 
+    @property
+    def tools_map(self) -> Dict[str, Dict[str, Any]]:
+        return self._tools
+
     def register(self, name: str, description: str, parameters: Dict[str, Any] = None):
         """
         Decorator to register a function as a tool.

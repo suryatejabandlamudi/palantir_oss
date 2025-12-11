@@ -1,0 +1,169 @@
+
+> web@0.1.0 build
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/suryatejabandlamudi/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /Users/suryatejabandlamudi/palantir_oss/nexus_os/apps/web/package-lock.json
+
+   ▲ Next.js 16.0.3 (Turbopack)
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+> Build error occurred
+Error: Turbopack build failed with 6 errors:
+./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx:7:1
+Export fetchObjectTypes doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mDatabase[39m[33m,[39m [33mFilter[39m[33m,[39m [33mSearch[39m[33m,[39m [33mTable[39m [36mas[39m [33mTableIcon[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { [33mButton[39m[33m,[39m [33mInput[39m } [36mfrom[39m [32m'@nexus/ui'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { fetchObjects[33m,[39m fetchObjectTypes } [36mfrom[39m [32m'@/lib/api'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m [33mObjectGrid[39m [36mfrom[39m [32m'@/components/ObjectGrid'[39m[33m;[39m
+ [90m  9 |[39m
+ [90m 10 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mObjectExplorerPage[39m({ params }[33m:[39m { params[33m:[39m { id[33m:[39m string } }) {[0m
+
+The export fetchObjectTypes was not found in module [project]/palantir_oss/nexus_os/apps/web/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import removeToken?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Client Component Browser]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Client Component SSR]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Server Component]
+
+
+./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx:7:1
+Export fetchObjectTypes doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mDatabase[39m[33m,[39m [33mFilter[39m[33m,[39m [33mSearch[39m[33m,[39m [33mTable[39m [36mas[39m [33mTableIcon[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { [33mButton[39m[33m,[39m [33mInput[39m } [36mfrom[39m [32m'@nexus/ui'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { fetchObjects[33m,[39m fetchObjectTypes } [36mfrom[39m [32m'@/lib/api'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m [33mObjectGrid[39m [36mfrom[39m [32m'@/components/ObjectGrid'[39m[33m;[39m
+ [90m  9 |[39m
+ [90m 10 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mObjectExplorerPage[39m({ params }[33m:[39m { params[33m:[39m { id[33m:[39m string } }) {[0m
+
+The export fetchObjectTypes was not found in module [project]/palantir_oss/nexus_os/apps/web/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import removeToken?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Client Component Browser]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Client Component SSR]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Server Component]
+
+
+./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx:7:1
+Export fetchObjectTypes doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mBox[39m[33m,[39m [33mPlus[39m[33m,[39m [33mNetwork[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@nexus/ui'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { fetchObjectTypes } [36mfrom[39m [32m'@/lib/api'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m [33mOntologyGraph[39m [36mfrom[39m [32m'@/components/OntologyGraph'[39m[33m;[39m
+ [90m  9 |[39m
+ [90m 10 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mOntologyPage[39m() {[0m
+
+The export fetchObjectTypes was not found in module [project]/palantir_oss/nexus_os/apps/web/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import removeToken?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx [Client Component Browser]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx [Client Component SSR]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx [Server Component]
+
+
+./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx:7:1
+Export fetchObjectTypes doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mBox[39m[33m,[39m [33mPlus[39m[33m,[39m [33mNetwork[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@nexus/ui'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { fetchObjectTypes } [36mfrom[39m [32m'@/lib/api'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m [33mOntologyGraph[39m [36mfrom[39m [32m'@/components/OntologyGraph'[39m[33m;[39m
+ [90m  9 |[39m
+ [90m 10 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mOntologyPage[39m() {[0m
+
+The export fetchObjectTypes was not found in module [project]/palantir_oss/nexus_os/apps/web/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import removeToken?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx [Client Component Browser]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx [Client Component SSR]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx [Server Component]
+
+
+./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx:7:1
+Export fetchObjects doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mDatabase[39m[33m,[39m [33mFilter[39m[33m,[39m [33mSearch[39m[33m,[39m [33mTable[39m [36mas[39m [33mTableIcon[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { [33mButton[39m[33m,[39m [33mInput[39m } [36mfrom[39m [32m'@nexus/ui'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { fetchObjects[33m,[39m fetchObjectTypes } [36mfrom[39m [32m'@/lib/api'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m [33mObjectGrid[39m [36mfrom[39m [32m'@/components/ObjectGrid'[39m[33m;[39m
+ [90m  9 |[39m
+ [90m 10 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mObjectExplorerPage[39m({ params }[33m:[39m { params[33m:[39m { id[33m:[39m string } }) {[0m
+
+The export fetchObjects was not found in module [project]/palantir_oss/nexus_os/apps/web/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import setToken?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Client Component Browser]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Client Component SSR]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Server Component]
+
+
+./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx:7:1
+Export fetchObjects doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mDatabase[39m[33m,[39m [33mFilter[39m[33m,[39m [33mSearch[39m[33m,[39m [33mTable[39m [36mas[39m [33mTableIcon[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { [33mButton[39m[33m,[39m [33mInput[39m } [36mfrom[39m [32m'@nexus/ui'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { fetchObjects[33m,[39m fetchObjectTypes } [36mfrom[39m [32m'@/lib/api'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m [33mObjectGrid[39m [36mfrom[39m [32m'@/components/ObjectGrid'[39m[33m;[39m
+ [90m  9 |[39m
+ [90m 10 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mObjectExplorerPage[39m({ params }[33m:[39m { params[33m:[39m { id[33m:[39m string } }) {[0m
+
+The export fetchObjects was not found in module [project]/palantir_oss/nexus_os/apps/web/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import setToken?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Client Component Browser]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Client Component SSR]
+    ./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx [Server Component]
+
+
+    at <unknown> (./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx:7:1)
+    at <unknown> (./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx:7:1)
+    at <unknown> (./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx:7:1)
+    at <unknown> (./palantir_oss/nexus_os/apps/web/src/app/foundry/ontology/page.tsx:7:1)
+    at <unknown> (./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx:7:1)
+    at <unknown> (./palantir_oss/nexus_os/apps/web/src/app/foundry/objects/[id]/page.tsx:7:1)

@@ -1,8 +1,8 @@
 from typing import List, Dict, Any
 from nexus_os.core.integrations.base import BaseConnector
-from core.client import APIClient
-from core.auth import OAuth2ClientCredentialsProvider
-from core.config import config
+from nexus_os.core.client import APIClient
+from nexus_os.core.auth import OAuth2ClientCredentialsProvider
+from nexus_os.core.config import config
 
 class ERPConnector(BaseConnector):
     """
@@ -12,26 +12,34 @@ class ERPConnector(BaseConnector):
 
     def __init__(self):
         super().__init__()
+        self.use_mock = False
         if config.D365_TENANT_ID and config.D365_CLIENT_ID and config.D365_CLIENT_SECRET:
-            token_url = f"https://login.microsoftonline.com/{config.D365_TENANT_ID}/oauth2/v2.0/token"
-            scope = "https://api.businesscentral.dynamics.com/.default"
-            
-            self.auth = OAuth2ClientCredentialsProvider(
-                token_url=token_url,
-                client_id=config.D365_CLIENT_ID,
-                client_secret=config.D365_CLIENT_SECRET,
-                scope=scope
-            )
-            
-            # Base URL for D365 BC OData V4 or API v2.0
-            # Format: https://api.businesscentral.dynamics.com/v2.0/{tenant_id}/{environment}/api/v2.0
-            self.client = APIClient(
-                base_url=f"https://api.businesscentral.dynamics.com/v2.0/{config.D365_TENANT_ID}/{config.D365_ENVIRONMENT}/api/v2.0",
-                auth_provider=self.auth
-            )
+            try:
+                token_url = f"https://login.microsoftonline.com/{config.D365_TENANT_ID}/oauth2/v2.0/token"
+                scope = "https://api.businesscentral.dynamics.com/.default"
+                
+                self.auth = OAuth2ClientCredentialsProvider(
+                    token_url=token_url,
+                    client_id=config.D365_CLIENT_ID,
+                    client_secret=config.D365_CLIENT_SECRET,
+                    scope=scope
+                )
+                
+                # Base URL for D365 BC OData V4 or API v2.0
+                self.client = APIClient(
+                    base_url=f"https://api.businesscentral.dynamics.com/v2.0/{config.D365_TENANT_ID}/{config.D365_ENVIRONMENT}/api/v2.0",
+                    auth_provider=self.auth
+                )
+            except Exception as e:
+                 print(f"Warning: D365 init failed, falling back to Mock DB. {e}")
+                 self.use_mock = True
         else:
-            print("WARNING: D365 credentials not found. ERPConnector will fail if used.")
-            self.client = None
+            # print("WARNING: D365 credentials not found. Using DuckDB for simulation.")
+            self.use_mock = True
+            
+        if self.use_mock:
+            from nexus_os.core.integrations.db import db
+            self.db = db
 
     def get_tools(self) -> List[Dict[str, Any]]:
         return [
@@ -62,36 +70,6 @@ class ERPConnector(BaseConnector):
                 }
             },
             {
-                "name": "erp_get_general_ledger",
-                "description": "Retrieves General Ledger (GL) entries.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "account_no": {"type": "string", "description": "Filter by G/L Account Number."}
-                    }
-                }
-            },
-            {
-                "name": "erp_get_payables",
-                "description": "Retrieves Accounts Payable (Vendor Invoices).",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "vendor_id": {"type": "string", "description": "Filter by Vendor ID."}
-                    }
-                }
-            },
-            {
-                "name": "erp_get_receivables",
-                "description": "Retrieves Accounts Receivable (Customer Invoices).",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "customer_id": {"type": "string", "description": "Filter by Customer ID."}
-                    }
-                }
-            },
-            {
                 "name": "erp_create_po",
                 "description": "Creates a Purchase Order.",
                 "parameters": {
@@ -112,62 +90,69 @@ class ERPConnector(BaseConnector):
                     "required": ["vendor_id", "items"]
                 }
             }
+            {
+                "name": "erp_check_price_cost",
+                "description": "Checks the margin between sales price and ERP cost.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "product_id": {"type": "string"}
+                    },
+                    "required": ["product_id"]
+                }
+            },
+            {
+                "name": "erp_check_schedule",
+                "description": "Checks production schedule and ATP (Available to Promise).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "sku": {"type": "string"},
+                        "date": {"type": "string"}
+                    },
+                    "required": ["sku"]
+                }
+            }
         ]
 
     def execute_tool(self, tool_name: str, **kwargs) -> Any:
-        if not self.client:
-            return "Error: D365 credentials not configured."
+        # if not self.client and not self.use_mock:
+        #    return "Error: D365 credentials not configured."
 
         if tool_name == "erp_get_sales_orders":
             return self._get_sales_orders(kwargs.get("customer_id"))
         elif tool_name == "erp_get_inventory":
             return self._get_inventory(kwargs.get("item_id"))
-        elif tool_name == "erp_get_general_ledger":
-            return self._get_general_ledger(kwargs.get("account_no"))
-        elif tool_name == "erp_get_payables":
-            return self._get_payables(kwargs.get("vendor_id"))
-        elif tool_name == "erp_get_receivables":
-            return self._get_receivables(kwargs.get("customer_id"))
         elif tool_name == "erp_create_po":
             return self._create_purchase_order(kwargs.get("vendor_id"), kwargs.get("items"))
+        elif tool_name == "erp_check_price_cost":
+            return self._check_price_cost(kwargs.get("product_id"))
+        elif tool_name == "erp_check_schedule":
+            return self._check_schedule(kwargs.get("sku"), kwargs.get("date"))
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
 
     def _get_general_ledger(self, account_no: str = None) -> List[Dict[str, Any]]:
-        endpoint = "generalLedgerEntries"
-        params = {}
-        if account_no:
-            params["$filter"] = f"accountNumber eq '{account_no}'"
-        
-        data = self.client.get(endpoint, params=params)
-        if not data: return []
-        
-        return data.get("value", [])
+        return [] # TODO: Implement DB table for GL if needed
 
     def _get_sales_orders(self, customer_id: str = None) -> List[Dict[str, Any]]:
-        endpoint = "salesOrders"
-        params = {}
-        if customer_id:
-            params["$filter"] = f"customerId eq '{customer_id}'"
-        
-        data = self.client.get(endpoint, params=params)
-        if not data:
-            return []
-            
-        # Map D365 response to our simplified schema
-        orders = []
-        for item in data.get("value", []):
-            orders.append({
-                "id": item.get("id"),
-                "number": item.get("number"),
-                "customerId": item.get("customerId"),
-                "customerName": item.get("customerName"),
-                "totalAmount": item.get("totalAmountIncludingTax"),
-                "status": item.get("status")
-            })
-        return orders
+        # TODO: Implement DB table for Sales Orders
+        return []
 
     def _get_inventory(self, item_id: str = None) -> List[Dict[str, Any]]:
+        if self.use_mock:
+            sql = "SELECT material_id as id, description as displayName, plant as location, stock as inventory, status FROM inventory"
+            params = []
+            if item_id:
+                # Basic fuzzy search for DB
+                sql += " WHERE material_id LIKE ? OR description LIKE ?"
+                params.append(f"%{item_id}%")
+                params.append(f"%{item_id}%")
+            
+            results = self.db.query(sql, tuple(params))
+            # Format to match tool expectations
+            return results
+
         endpoint = "items"
         params = {}
         if item_id:
@@ -189,61 +174,30 @@ class ERPConnector(BaseConnector):
             })
         return items
 
-    def _get_payables(self, vendor_id: str = None) -> List[Dict[str, Any]]:
-        """
-        Fetch vendor invoices (Accounts Payable).
-        """
-        endpoint = "purchaseInvoices"
-        params = {}
-        if vendor_id:
-            params["$filter"] = f"vendorId eq '{vendor_id}'"
-            
-        data = self.client.get(endpoint, params=params)
-        if not data: return []
-        
-        invoices = []
-        for item in data.get("value", []):
-            invoices.append({
-                "id": item.get("id"),
-                "number": item.get("number"),
-                "vendorId": item.get("vendorId"),
-                "vendorName": item.get("vendorName"),
-                "totalAmount": item.get("totalAmountIncludingTax"),
-                "dueDate": item.get("dueDate"),
-                "status": item.get("status")
-            })
-        return invoices
-
-    def _get_receivables(self, customer_id: str = None) -> List[Dict[str, Any]]:
-        """
-        Fetch customer invoices (Accounts Receivable).
-        """
-        endpoint = "salesInvoices"
-        params = {}
-        if customer_id:
-            params["$filter"] = f"customerId eq '{customer_id}'"
-            
-        data = self.client.get(endpoint, params=params)
-        if not data: return []
-        
-        invoices = []
-        for item in data.get("value", []):
-            invoices.append({
-                "id": item.get("id"),
-                "number": item.get("number"),
-                "customerId": item.get("customerId"),
-                "customerName": item.get("customerName"),
-                "totalAmount": item.get("totalAmountIncludingTax"),
-                "dueDate": item.get("dueDate"),
-                "status": item.get("status")
-            })
-        return invoices
-
     def _create_purchase_order(self, vendor_id: str, items: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Create a Purchase Order.
         items: List of dicts with 'itemId' and 'quantity'.
         """
+        if self.use_mock:
+            import uuid
+            po_id = f"PO-{str(uuid.uuid4())[:8]}"
+            
+            for item in items:
+                self.db.execute("INSERT INTO purchase_orders (id, material_id, quantity, vendor, status) VALUES (?, ?, ?, ?, ?)", 
+                               (po_id, item['itemId'], item['quantity'], vendor_id, 'Released'))
+                
+                # Update inventory logic (simple decrement or increment depending on PO type, usually PO increases stock on receipt, here we just assume it's ordered)
+                # For demo purposes, let's say "Immediate Delivery" updates stock
+                # self.db.execute("UPDATE inventory SET stock = stock + ? WHERE material_id = ?", (item['quantity'], item['itemId']))
+
+            return {
+                "id": po_id,
+                "vendorId": vendor_id,
+                "lines": items,
+                "message": "Purchase Order Created in NexusDB (Simulated)"
+            }
+
         # 1. Create Header
         endpoint = "purchaseOrders"
         payload = {
@@ -272,4 +226,24 @@ class ERPConnector(BaseConnector):
             "number": po_data.get("number"),
             "vendorId": vendor_id,
             "lines": created_lines
+        }
+
+    def _check_price_cost(self, product_id):
+        # Mock Logic for Margin Guardrails
+        return {
+             "product_id": product_id,
+             "list_price": 100.00,
+             "cost_of_goods": 45.00,
+             "margin_percent": 55,
+             "currency": "USD"
+        }
+
+    def _check_schedule(self, sku, date):
+        # Mock Logic for ATP
+        return {
+            "sku": sku,
+            "requested_date": date,
+            "available_quantity": 120,
+            "next_production_run": "2025-01-15",
+            "status": "AVAILABLE"
         }

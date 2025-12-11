@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 from nexus_os.core.integrations.base import BaseConnector
-from core.config import config
+from nexus_os.core.config import config
 
 # Try importing external libraries, handle missing deps gracefully
 try:

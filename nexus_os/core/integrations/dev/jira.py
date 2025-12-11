@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from nexus_os.core.integrations.base import BaseConnector
-from core.config import config
+from nexus_os.core.config import config
 
 class JiraConnector(BaseConnector):
     """

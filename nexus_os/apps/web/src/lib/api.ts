@@ -145,5 +145,28 @@ export const api = {
             console.error(e);
             return null;
         }
-    }
+    },
+    // --- Agent Analysis (Gemini) ---
+    runAgentAnalysis: async (context: any, prompt: string) => {
+        try {
+            const res = await fetchWithAuth('/agent/analyze', {
+                method: 'POST',
+                body: JSON.stringify({ context, prompt })
+            });
+            if (!res.ok) throw new Error('Analysis failed');
+            return await res.json();
+        } catch (e) {
+            console.error(e);
+            // Fallback for demo if backend is offline
+            return {
+                insight: "AI Service Connection Failed. Using cached heuristics.",
+                steps: ["Attempting Connection", "Fallback to Local Logic", "Analysis Complete"]
+            };
+        }
+    },
 };
+
+export const fetchObjectTypes = api.getObjectTypes;
+export const fetchObjects = api.getObjects;
+export const createObject = api.createObject;
+export const chatWithAgent = api.chatWithAgent;

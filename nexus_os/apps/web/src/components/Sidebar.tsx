@@ -32,9 +32,9 @@ const Sidebar = () => {
                         <span style={{ fontSize: '18px' }}>⚛️</span>
                     </div>
                 </Link>
-                <Link href="/aip" title="AIP">
-                    <div className="nav-item" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '18px' }}>A</span>
+                <Link href="/builder" title="AIP Logic Builder">
+                    <div className="nav-item text-white hover:bg-slate-800" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '18px' }}>🤖</span>
                     </div>
                 </Link>
                 <Link href="/gotham" title="Gotham">
@@ -47,8 +47,39 @@ const Sidebar = () => {
                         <span style={{ fontSize: '18px' }}>Ω</span>
                     </div>
                 </Link>
-            </nav>
-        </div>
+
+                <div className="w-8 h-px bg-slate-700 my-2"></div>
+
+                <Link href="/command-center" title="Command Center">
+                    <div className="nav-item text-white hover:bg-slate-800" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '18px' }}>🛡️</span>
+                    </div>
+                </Link>
+
+                {/* Enterprise Integrations */}
+                <div className="w-8 h-px bg-slate-700 my-2"></div>
+
+                <Link href="/erp" title="ERP: SAP">
+                    <div className="nav-item text-white hover:bg-slate-800" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>SAP</span>
+                    </div>
+                </Link>
+                <Link href="/crm" title="CRM: Salesforce">
+                    <div className="nav-item text-white hover:bg-slate-800" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>SF</span>
+                    </div>
+                </Link>
+                <Link href="/hcm" title="HCM: Workday">
+                    <div className="nav-item text-white hover:bg-slate-800" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>WD</span>
+                    </div>
+                </Link>
+                <Link href="/itsm" title="ITSM: ServiceNow">
+                    <div className="nav-item text-white hover:bg-slate-800" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>SN</span>
+                    </div>
+                </Link>            </nav>
+        </div >
     );
 };
 
