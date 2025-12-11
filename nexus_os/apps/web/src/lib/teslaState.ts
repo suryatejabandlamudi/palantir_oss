@@ -107,6 +107,8 @@ interface TeslaState {
     isLive: boolean;
     ontology: OntologyState; // NEW
     protocols: Protocol[];   // UPDATED to new Schema
+    signals: Signal[];
+    factories: FactoryState[];
 
     // Combined domain states (placeholders for now)
     orders: any[];
@@ -131,6 +133,7 @@ interface TeslaState {
     deleteProtocol: (id: string) => void;
     updateProtocolStatus: (id: string, status: Protocol['status']) => void; // Simplified for now
     evaluateProtocols: () => void;
+    fetchProtocols: () => Promise<void>;
 }
 
 export const useTeslaStore = create<TeslaState>((set, get) => ({
@@ -140,7 +143,7 @@ export const useTeslaStore = create<TeslaState>((set, get) => ({
     fsdBuilds: [], // Placeholder
     isLive: false,
     ontology: INITIAL_ONTOLOGY,
-    protocols: INITIAL_PROTOCOLS,
+    protocols: [], // Fetched via API
 
     // Combined domain states (placeholders)
     orders: [],
@@ -184,8 +187,13 @@ export const useTeslaStore = create<TeslaState>((set, get) => ({
     updateProtocolStatus: (id, status) => set((state) => ({
         protocols: state.protocols.map((p) => (p.id === id ? { ...p, status } : p)),
     })),
-    evaluateProtocols: () => {
-        // Placeholder for protocol evaluation logic
-        console.log("Evaluating protocols...");
+    fetchProtocols: async () => {
+        try {
+            const res = await fetch('/api/protocols');
+            const data = await res.json();
+            set({ protocols: data });
+        } catch (e) {
+            console.error('Failed to fetch protocols:', e);
+        }
     },
 }));

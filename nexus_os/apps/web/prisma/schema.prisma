@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// --- INTEGRATION LAYER ---
+
+model Integration {
+  id          String   @id @default(uuid())
+  systemId    String   @unique // "sap-erp-01", "salesforce-crm"
+  type        String   // SAP, SALESFORCE, WORKDAY, SLACK, TEAMS, SERVICE_NOW
+  name        String   // "Global SAP Instance"
+  status      String   // ACTIVE, DISCONNECTED, ERROR
+  config      String   // Encrypted JSON: { url, region, apiVersion }
+  credentials String   // Encrypted JSON: { clientId, ... }
+  
+  resources   ExternalResource[]
+  actions     IntegrationAction[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model IntegrationAction {
+  id            String      @id @default(uuid())
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id])
+  
+  name          String      // "Lock User", "Create PO"
+  key           String      // "sap_lock_user"
+  schema        String      // JSON Schema for inputs
+  description   String
+  
+  protocolSteps ProtocolStep[]
+}
+
+// --- BUSINESS GRAPH (REAL DATA) ---
+
+model ExternalResource {
+  id            String      @id @default(uuid())
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id])
+  
+  externalId    String      // "EMP-123456", "PO-998877"
+  type          String      // EMPLOYEE, INVOICE, TICKET, CUSTOMER
+  name          String      // "John Doe", "Acme Corp"
+  metadata      String      // JSON: { email: "...", role: "..." }
+  lastSyncedAt  DateTime    @default(now())
+  
+  // Relations could be added here for a true graph, e.g., @relation("ManagerSubordinate")
+}
+
+// --- PROTOCOL & WORKFLOW ENGINE ---
+
+model Protocol {
+  id            String   @id // "SEC-001"
+  title         String
+  description   String
+  category      String   // ITSM, SecOps, Revenue, SupplyChain, HR
+  status        String   // ACTIVE, DRAFT
+  
+  // The "Contract"
+  contextSchema String   // JSON Schema of expected input
+  triggerType   String   // EVENT, SCHEDULE, MANUAL
+  triggerConfig String   // JSON: { event: "user.login", filter: "risk > 90" }
+  
+  steps         ProtocolStep[]
+  runs          ProtocolRun[]
+  
+  // Legacy JSON fields for backward compatibility during migration if needed
+  // stepsJson     String? 
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ProtocolStep {
+  id             String   @id @default(uuid())
+  protocolId     String
+  protocol       Protocol @relation(fields: [protocolId], references: [id])
+  
+  order          Int
+  description    String
+  
+  // What to do?
+  actionId       String?
+  action         IntegrationAction? @relation(fields: [actionId], references: [id])
+  
+  // Logic
+  logicType      String   // LLM_DECISION, DETERMINISTIC_RULE
+  logicConfig    String   // JSON: System prompt override, or Rule definition
+}
+
+// --- OBSERVABILITY & AUDIT ---
+
+model ProtocolRun {
+  id          String   @id @default(uuid())
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id])
+  
+  status      String   // RUNNING, COMPLETED, BLOCKED, FAILED
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  
+  logs        RunLog[]
+}
+
+model RunLog {
+  id            String       @id @default(uuid())
+  runId         String
+  run           ProtocolRun  @relation(fields: [runId], references: [id])
+  
+  timestamp     DateTime     @default(now())
+  stepId        String?
+  
+  type          String       // THOUGHT, ACTION, SYSTEM
+  severity      String       // INFO, WARN, ERROR
+  message       String
+  metadata      String       // JSON: { tokens: 150, latency: 200ms }
+}

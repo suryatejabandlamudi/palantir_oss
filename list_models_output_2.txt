@@ -1,0 +1,93 @@
+An error occurred: module 'importlib.metadata' has no attribute 'packages_distributions'
+/Users/suryatejabandlamudi/Library/Python/3.9/lib/python/site-packages/google/api_core/_python_version_support.py:252: FutureWarning: You are using a Python version (3.9.6) past its end of life. Google will update google.api_core with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/Users/suryatejabandlamudi/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Checking available models with Key: AIzaSyCk1T...
+
+--- SDK Method ---
+Found: models/gemini-2.5-flash
+Found: models/gemini-2.5-pro
+Found: models/gemini-2.0-flash-exp
+Found: models/gemini-2.0-flash
+Found: models/gemini-2.0-flash-001
+Found: models/gemini-2.0-flash-exp-image-generation
+Found: models/gemini-2.0-flash-lite-001
+Found: models/gemini-2.0-flash-lite
+Found: models/gemini-2.0-flash-lite-preview-02-05
+Found: models/gemini-2.0-flash-lite-preview
+Found: models/gemini-exp-1206
+Found: models/gemini-2.5-flash-preview-tts
+Found: models/gemini-2.5-pro-preview-tts
+Found: models/gemma-3-1b-it
+Found: models/gemma-3-4b-it
+Found: models/gemma-3-12b-it
+Found: models/gemma-3-27b-it
+Found: models/gemma-3n-e4b-it
+Found: models/gemma-3n-e2b-it
+Found: models/gemini-flash-latest
+Found: models/gemini-flash-lite-latest
+Found: models/gemini-pro-latest
+Found: models/gemini-2.5-flash-lite
+Found: models/gemini-2.5-flash-image-preview
+Found: models/gemini-2.5-flash-image
+Found: models/gemini-2.5-flash-preview-09-2025
+Found: models/gemini-2.5-flash-lite-preview-09-2025
+Found: models/gemini-3-pro-preview
+Found: models/gemini-3-pro-image-preview
+Found: models/nano-banana-pro-preview
+Found: models/gemini-robotics-er-1.5-preview
+Found: models/gemini-2.5-computer-use-preview-10-2025
+Found: models/deep-research-pro-preview-12-2025
+
+--- REST API Method (X-goog-api-key) ---
+REST Found: models/embedding-gecko-001
+REST Found: models/gemini-2.5-flash
+REST Found: models/gemini-2.5-pro
+REST Found: models/gemini-2.0-flash-exp
+REST Found: models/gemini-2.0-flash
+REST Found: models/gemini-2.0-flash-001
+REST Found: models/gemini-2.0-flash-exp-image-generation
+REST Found: models/gemini-2.0-flash-lite-001
+REST Found: models/gemini-2.0-flash-lite
+REST Found: models/gemini-2.0-flash-lite-preview-02-05
+REST Found: models/gemini-2.0-flash-lite-preview
+REST Found: models/gemini-exp-1206
+REST Found: models/gemini-2.5-flash-preview-tts
+REST Found: models/gemini-2.5-pro-preview-tts
+REST Found: models/gemma-3-1b-it
+REST Found: models/gemma-3-4b-it
+REST Found: models/gemma-3-12b-it
+REST Found: models/gemma-3-27b-it
+REST Found: models/gemma-3n-e4b-it
+REST Found: models/gemma-3n-e2b-it
+REST Found: models/gemini-flash-latest
+REST Found: models/gemini-flash-lite-latest
+REST Found: models/gemini-pro-latest
+REST Found: models/gemini-2.5-flash-lite
+REST Found: models/gemini-2.5-flash-image-preview
+REST Found: models/gemini-2.5-flash-image
+REST Found: models/gemini-2.5-flash-preview-09-2025
+REST Found: models/gemini-2.5-flash-lite-preview-09-2025
+REST Found: models/gemini-3-pro-preview
+REST Found: models/gemini-3-pro-image-preview
+REST Found: models/nano-banana-pro-preview
+REST Found: models/gemini-robotics-er-1.5-preview
+REST Found: models/gemini-2.5-computer-use-preview-10-2025
+REST Found: models/deep-research-pro-preview-12-2025
+REST Found: models/embedding-001
+REST Found: models/text-embedding-004
+REST Found: models/gemini-embedding-exp-03-07
+REST Found: models/gemini-embedding-exp
+REST Found: models/gemini-embedding-001
+REST Found: models/aqa
+REST Found: models/imagen-4.0-generate-preview-06-06
+REST Found: models/imagen-4.0-ultra-generate-preview-06-06
+REST Found: models/imagen-4.0-generate-001
+REST Found: models/imagen-4.0-ultra-generate-001
+REST Found: models/imagen-4.0-fast-generate-001
+REST Found: models/veo-2.0-generate-001
+REST Found: models/veo-3.0-generate-001
+REST Found: models/veo-3.0-fast-generate-001
+REST Found: models/veo-3.1-generate-preview
+REST Found: models/veo-3.1-fast-generate-preview

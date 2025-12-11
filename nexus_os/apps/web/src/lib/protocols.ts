@@ -44,6 +44,7 @@ export interface Protocol {
     id: string;
     title: string;
     description: string;
+    contextSchema: Record<string, string>; // e.g. { "velocity": "number (mph)", "last_login": "ISO Date" }
     category: 'ITSM' | 'SecOps' | 'Revenue' | 'SupplyChain' | 'HR';
     status: 'ACTIVE' | 'DRAFT' | 'PAUSED' | 'ARCHIVED';
     createdAt: string;
@@ -56,107 +57,43 @@ export interface Protocol {
 }
 
 export const INITIAL_PROTOCOLS: Protocol[] = [
-    // --- ITSM ---
-    {
-        id: 'ITSM-001',
-        title: 'Start-Day Access Preflight',
-        description: 'Automated access provisioning for new contractors.',
-        category: 'ITSM',
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        steps: {
-            trigger: { id: 't1', system: 'WORKDAY', event: 'contractor.created', description: 'New Contractor Record < 72h before start' },
-            conditions: [{ id: 'c1', field: 'start_date', operator: 'LESS_THAN', value: '72h' }],
-            actions: [
-                { id: 'a1', type: 'AUTOMATION', system: 'SERVICENOW', action: 'create_request', params: { type: 'access' } },
-                { id: 'a2', type: 'AUTOMATION', system: 'SLACK', action: 'notify_manager', params: {} }
-            ]
-        },
-        stats: { runs: 45, successRate: 98 }
-    },
-    {
-        id: 'ITSM-003',
-        title: 'Offboarding Kill-Switch',
-        description: 'Instant revocation of access upon termination.',
-        category: 'ITSM',
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        steps: {
-            trigger: { id: 't3', system: 'WORKDAY', event: 'worker.terminated', description: 'Employee Terminated' },
-            conditions: [],
-            actions: [
-                { id: 'a3', type: 'AUTOMATION', system: 'SALESFORCE', action: 'freeze_user', params: {} },
-                { id: 'a4', type: 'AI_AGENT', system: 'SLACK', action: 'audit_log', params: {}, agentRole: 'Security Bot' }
-            ]
-        },
-        stats: { runs: 12, successRate: 100 }
-    },
-
-    // --- SecOps ---
+    // --- LEGACY / DEMOS ---
     {
         id: 'SEC-001',
         title: 'Impossible Travel Containment',
         description: 'Locks account if logins detected in distant locations.',
+        contextSchema: {
+            user_id: 'string',
+            velocity: 'number (mph)',
+            last_location: 'string (City, Country)',
+            current_location: 'string (City, Country)',
+            time_diff: 'number (hours)'
+        },
         category: 'SecOps',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         steps: {
             trigger: { id: 't_sec1', system: 'SPLUNK', event: 'geo.velocity.violation', description: 'Geo-velocity violation detected' },
-            conditions: [{ id: 'c_sec1', field: 'velocity', operator: 'GREATER_THAN', value: '600mph' }],
+            conditions: [{ id: 'c_sec1', field: 'velocity', operator: 'GREATER_THAN', value: 600 }],
             actions: [
-                { id: 'a_sec1', type: 'AUTOMATION', system: 'SALESFORCE', action: 'lock_user', params: { reason: 'impossible_travel' } }, // Using SF as proxy for Okta in this schema
+                { id: 'a_sec1', type: 'AUTOMATION', system: 'SALESFORCE', action: 'lock_user', params: { reason: 'impossible_travel' } },
                 { id: 'a_sec2', type: 'AI_AGENT', system: 'SLACK', action: 'alert_secops', params: { channel: '#soc-critical' }, agentRole: 'SOC Analyst' }
             ]
         },
         stats: { runs: 142, successRate: 99 }
     },
 
-    // --- Revenue ---
-    {
-        id: 'REV-001',
-        title: 'Competitor Counter-Offer',
-        description: 'Drafts competitive quotes based on intel.',
-        category: 'Revenue',
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        steps: {
-            trigger: { id: 't_rev1', system: 'SALESFORCE', event: 'competitor.mentioned', description: 'Competitor mentioned in Opportunity' },
-            conditions: [{ id: 'c_rev1', field: 'margin', operator: 'GREATER_THAN', value: '20%' }],
-            actions: [
-                { id: 'a_rev1', type: 'AI_AGENT', system: 'EMAIL', action: 'draft_response', params: { tone: 'competitive' }, agentRole: 'Sales Coach' }
-            ]
-        },
-        stats: { runs: 8, successRate: 85 }
-    },
-
-    // --- Supply Chain ---
-    {
-        id: 'SUP-001',
-        title: 'Shipment Delay Re-route',
-        description: 'Suggests alternative logistics for delayed cargo.',
-        category: 'SupplyChain',
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        steps: {
-            trigger: { id: 't_sup1', system: 'SAP', event: 'vessel.delayed', description: 'Vessel Delay Event > 24h' },
-            conditions: [{ id: 'c_sup1', field: 'cargo_value', operator: 'GREATER_THAN', value: '$50k' }],
-            actions: [
-                { id: 'a_sup1', type: 'AI_AGENT', system: 'SAP', action: 'check_routes', params: {}, agentRole: 'Logistics Planner' },
-                { id: 'a_sup2', type: 'HUMAN_APPROVAL', system: 'EMAIL', action: 'approve_air_freight', params: {} }
-            ]
-        },
-        stats: { runs: 3, successRate: 100 }
-    },
     // --- BATCH 1: IT & SECURITY ---
     {
         id: 'IT-001',
         title: 'Start-Day Access Preflight',
         description: 'Ensure new contractors have access on Day 1 by detecting missing permissions 72h prior.',
+        contextSchema: {
+            contractor_name: 'string',
+            days_until_start: 'number',
+            access_request_status: "string ('missing' | 'complete')"
+        },
         category: 'ITSM',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -179,6 +116,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'IT-002',
         title: 'Onboarding Autopilot',
         description: 'Orchestrate valid onboarding across Identity, Device, and Apps queues.',
+        contextSchema: {
+            new_hire_id: 'string',
+            onboarding_status: "string ('pending' | 'in_progress' | 'complete')",
+            device_provisioned: 'boolean'
+        },
         category: 'ITSM',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -200,6 +142,12 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'SEC-002',
         title: 'CVE Patch Plan',
         description: 'Map Critical CVEs to App Owners and auto-generate patch plans.',
+        contextSchema: {
+            cve_id: 'string',
+            cvss_score: 'number (0-10)',
+            public_exposure: 'boolean',
+            affected_assets: 'string[]'
+        },
         category: 'SecOps',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -222,6 +170,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'SEC-003',
         title: 'Vendor Bank-Change Guard',
         description: 'Prevent AP fraud by enforcing 2-channel verification for bank changes.',
+        contextSchema: {
+            vendor_id: 'string',
+            request_source: "string ('email' | 'portal')",
+            verification_status: "string ('verified' | 'pending' | 'failed')"
+        },
         category: 'SecOps',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -238,11 +191,20 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
                 { id: 'NO_ACTION', type: 'AUTOMATION', system: 'INTERNAL', action: 'log_info', params: {} }
             ]
         },
+        stats: { runs: 0, successRate: 0 }
+    },
+
     // --- BATCH 2: REVENUE & OPS ---
     {
         id: 'REV-001',
         title: 'Competitor Counter-Offer',
         description: 'Drafts competitive quotes based on intel.',
+        contextSchema: {
+            opportunity_id: 'string',
+            competitor_name: 'string',
+            margin: 'percentage',
+            deal_size: 'currency (USD)'
+        },
         category: 'Revenue',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -264,6 +226,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'REV-002',
         title: 'Margin Guardrails',
         description: 'Prevents negative margin quotes by checking real-time ERP costs.',
+        contextSchema: {
+            quote_id: 'string',
+            projected_margin: 'percentage',
+            sku: 'string'
+        },
         category: 'Revenue',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -285,6 +252,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'OPS-001',
         title: 'Promise-to-Deliver Check',
         description: 'Validates ship dates against real inventory and production constraints.',
+        contextSchema: {
+            order_id: 'string',
+            inventory_level: 'number',
+            order_quantity: 'number'
+        },
         category: 'SupplyChain',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -306,6 +278,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'OPS-002',
         title: 'Supply Chain Disruption',
         description: 'Re-routes logistics upon detecting port strikes or weather delays.',
+        contextSchema: {
+            incident_type: 'string',
+            delay_impact: 'number (hours)',
+            affected_lanes: 'string[]'
+        },
         category: 'SupplyChain',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -313,7 +290,7 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         steps: {
             trigger: { id: 'ops_t2', system: 'CONTROL_TOWER', event: 'logistics.delay', description: 'Port delay detected' },
             conditions: [
-                { id: 'ops_c2', field: 'delay_impact', operator: 'GREATER_THAN', value: '48h' }
+                { id: 'ops_c2', field: 'delay_impact', operator: 'GREATER_THAN', value: 48 }
             ],
             actions: [
                 { id: 'ops_find_routes', type: 'AI_AGENT', system: 'SAP', action: 'optimize_route', params: { mode: 'air' }, agentRole: 'Logistics Manager' },
@@ -322,11 +299,17 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         },
         stats: { runs: 0, successRate: 0 }
     },
+
     // --- BATCH 3: IT & SEC DEEP DIVE ---
     {
         id: 'SEC-004',
         title: 'Third-Party Access Monitor',
         description: 'Detects and revokes idle third-party vendor access after 30 days.',
+        contextSchema: {
+            vendor_id: 'string',
+            days_inactive: 'number',
+            vendor_type: "string ('contractor' | 'partner')"
+        },
         category: 'SecOps',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -349,6 +332,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'SEC-005',
         title: 'Incident Evidence Packager',
         description: 'Auto-collects logs, charts, and user activity for High Severity incidents.',
+        contextSchema: {
+            incident_id: 'string',
+            severity: "string ('SEV-1' | 'SEV-2')",
+            source: 'string'
+        },
         category: 'SecOps',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -370,6 +358,10 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'IT-003',
         title: 'Offboarding Kill-Switch',
         description: 'Instant revocation of all access upon "Terminated" status in HRIS.',
+        contextSchema: {
+            employee_id: 'string',
+            termination_type: "string ('voluntary' | 'involuntary')"
+        },
         category: 'ITSM',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -391,6 +383,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'IT-004',
         title: 'Role Change Access Diff',
         description: 'Removes old permissions when a user changes department.',
+        contextSchema: {
+            user_id: 'string',
+            old_dept: 'string',
+            new_dept: 'string'
+        },
         category: 'ITSM',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -411,6 +408,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'IT-005',
         title: 'CMDB Drift Detector',
         description: 'Identifies unmanaged cloud assets and enforces tagging.',
+        contextSchema: {
+            asset_id: 'string',
+            uptime: 'number (hours)',
+            tags: 'string[]'
+        },
         category: 'ITSM',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -418,7 +420,7 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         steps: {
             trigger: { id: 'it_t5', system: 'AWS_CONFIG', event: 'untagged_resource', description: 'Resource missing CostCenter tag' },
             conditions: [
-                { id: 'it_c6', field: 'uptime', operator: 'GREATER_THAN', value: '24h' }
+                { id: 'it_c6', field: 'uptime', operator: 'GREATER_THAN', value: 24 }
             ],
             actions: [
                 { id: 'it_auto_tag', type: 'AI_AGENT', system: 'AWS', action: 'infer_tag', params: {}, agentRole: 'Cloud FinOps' },
@@ -427,11 +429,17 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         },
         stats: { runs: 0, successRate: 0 }
     },
+
     // --- BATCH 4: HR, FIN, LEGAL ---
     {
         id: 'HR-001',
         title: 'Benefit Enrollment Error',
         description: 'Detects optional benefits selected without required base plans.',
+        contextSchema: {
+            employee_id: 'string',
+            has_hsa: 'boolean',
+            has_hdhp: 'boolean'
+        },
         category: 'HR',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -454,6 +462,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'HR-002',
         title: 'Payroll Variance Check',
         description: 'Flags payroll cycles with >10% variance from average.',
+        contextSchema: {
+            pay_period: 'string',
+            total_variance: 'percentage',
+            previous_average: 'currency'
+        },
         category: 'HR',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -475,6 +488,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'FIN-001',
         title: 'Duplicate Invoice Check',
         description: 'Blocks payment of invoices with identical amounts/dates/vendors.',
+        contextSchema: {
+            invoice_id: 'string',
+            is_potential_duplicate: 'boolean',
+            vendor_name: 'string'
+        },
         category: 'Revenue',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -496,6 +514,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'FIN-002',
         title: 'CapEx Policy Enforcer',
         description: 'Routes unbudgeted CapEx >$50k for special committee approval.',
+        contextSchema: {
+            requisition_id: 'string',
+            amount: 'currency (USD)',
+            is_budgeted: 'boolean'
+        },
         category: 'Revenue',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -517,6 +540,11 @@ export const INITIAL_PROTOCOLS: Protocol[] = [
         id: 'LEG-001',
         title: 'Legal Hold Automator',
         description: 'Freezes data deletion policies for users under investigation.',
+        contextSchema: {
+            hold_id: 'string',
+            user_id: 'string',
+            reason: 'string'
+        },
         category: 'SecOps',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),

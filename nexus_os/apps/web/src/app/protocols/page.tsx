@@ -3,14 +3,18 @@
 import { useTeslaStore } from "@/lib/teslaState";
 import { ResolutionProtocolCard } from "@/components/ResolutionProtocolCard";
 import { Search, Filter, Shield, DollarSign, Truck, Smartphone, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProtocolBuilder } from "@/components/ProtocolBuilder";
 
 export default function ProtocolsPage() {
-    const { protocols } = useTeslaStore();
+    const { protocols, fetchProtocols } = useTeslaStore();
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("ALL");
     const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+
+    useEffect(() => {
+        fetchProtocols();
+    }, []);
 
     const filteredProtocols = protocols.filter(p => {
         const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase());

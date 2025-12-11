@@ -1,0 +1,14 @@
+/Users/suryatejabandlamudi/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+/Users/suryatejabandlamudi/Library/Python/3.9/lib/python/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "/Volumes/ssd/personal_projects/palantir_oss/nexus_os/apps/aip/server.py", line 10, in <module>
+    from nexus_os.apps.aip.agent_runtime.orchestrator import Orchestrator
+  File "/Volumes/ssd/personal_projects/palantir_oss/nexus_os/apps/aip/agent_runtime/orchestrator.py", line 8, in <module>
+    from nexus_os.core.integrations.itsm.client import ITSMConnector
+  File "/Volumes/ssd/personal_projects/palantir_oss/nexus_os/core/integrations/itsm/client.py", line 57
+    {
+    ^
+SyntaxError: invalid syntax

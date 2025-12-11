@@ -1,93 +1,68 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Protocol, ProtocolAction, ProtocolStepResult } from './protocols';
 
-// Global Configuration
-const MODEL_ID = 'gemini-3-pro-preview';
+// Fallback model if 3.0 preview is unavailable/unstable
+const GEMINI_MODEL = 'gemini-2.0-flash';
 const FALLBACK_KEY = 'REDACTED_API_KEY'; // Validated AIza Key
 
 interface AgentContext {
-    protocol: Protocol;
-    data: any; // The "World State" (Simulated or Real)
-    userParams?: any; // e.g. "Lock account ID 123"
+    [key: string]: any;
 }
 
-export async function runProtocolAgent(
-    protocol: Protocol,
-    contextData: any,
-    apiKey: string = process.env.GOOGLE_API_KEY || FALLBACK_KEY
-): Promise<ProtocolStepResult> {
+export async function runProtocolAgent(protocol: Protocol, context: AgentContext): Promise<ProtocolStepResult> {
+    // Force specific key for stability during demo
+    const apiKey = 'REDACTED_API_KEY';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
-    if (!apiKey) {
-        throw new Error("Missing Google API Key");
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-        model: MODEL_ID,
-        systemInstruction: {
-            role: "system",
-            parts: [{ text: constructSystemPrompt(protocol) }]
-        },
-        generationConfig: {
-            temperature: 0.1, // Strict adherence
-            maxOutputTokens: 1000,
-            responseMimeType: "application/json"
-        }
-    });
-
-    // Construct the "Case File" for the Agent
-    const prompt = `
-    CURRENT SITUATION (CONTEXT):
-    ${JSON.stringify(contextData, null, 2)}
-
-    YOUR MISSION:
-    Analyze the Context against the Protocol.
-    Decide the Next Best Action (NBA).
-    
-    OUTPUT FORMAT (JSON ONLY):
-    {
-        "thought_process": ["Step 1 observation", "Step 2 rule match", "Step 3 decision"],
-        "decision": {
-            "action_id": "ACTION_ID_FROM_PROTOCOL",
-            "reasoning": "Why this action?",
-            "parameters": { ...key value pairs based on context... }
-        },
-        "status": "APPROVED" | "DENIED" | "NEEDS_APPROVAL"
-    }
-    `;
+    const systemPrompt = constructSystemPrompt(protocol);
+    const userPrompt = constructUserPrompt(protocol, context);
 
     try {
-        const result = await model.generateContent(prompt);
-        const text = result.response.text();
-        const response = JSON.parse(text);
-
-        // Basic Validation: Ensure action exists in protocol
-        const actionId = response.decision?.action_id;
-        const knownAction = protocol.steps.actions.find(a => a.id === actionId);
-
-        if (actionId && !knownAction && actionId !== 'NO_ACTION') {
-            return {
-                thoughts: response.thought_process || ["Error: Agent hallucinated an unknown action."],
-                decision: 'BLOCK',
-                action: { id: 'ERROR', system: 'INTERNAL', type: 'AUTOMATION', action: 'error_handler', params: { error: 'Invalid Action ID' } },
-                raw_response: text
-            };
-        }
-
-        return {
-            thoughts: response.thought_process || [],
-            decision: response.status === 'APPROVED' ? 'EXECUTE' : 'WAIT',
-            action: knownAction || { id: 'NO_ACTION', system: 'INTERNAL', type: 'AUTOMATION', action: 'log_no_action', params: {} },
-            raw_response: text
+        const payload = {
+            contents: [{
+                parts: [
+                    { text: systemPrompt },
+                    { text: userPrompt }
+                ]
+            }],
+            generationConfig: {
+                temperature: 0.1,
+                responseMimeType: "application/json"
+            }
         };
 
-    } catch (error) {
-        console.error("Agent Execution Failed:", error);
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-goog-api-key': apiKey
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Gemini API Error: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!text) {
+            throw new Error("Empty response from Gemini");
+        }
+
+        // console.log(`Agent Logic:\n${text}`);
+
+        return parseAgentResponse(text, protocol.steps.actions);
+
+    } catch (e: any) {
+        // Fallback for demo/simulation if API fails or rate limits
+        console.error("Agent Execution Failed:", e.message);
         return {
-            thoughts: ["Critical Failure: Model execution error", String(error)],
-            decision: 'BLOCK',
-            action: { id: 'ERROR', system: 'INTERNAL', type: 'AUTOMATION', action: 'system_failure', params: { error: String(error) } },
-            raw_response: String(error)
+            thoughts: ["Critical Failure: Model execution error", `Error: ${e.message}`],
+            decision: "BLOCK",
+            action: { id: "ERROR", type: "AUTOMATION", system: "INTERNAL", action: "log_error", params: { error: e.message } },
+            raw_response: e.message
         };
     }
 }
@@ -100,6 +75,10 @@ function constructSystemPrompt(protocol: Protocol): string {
     
     THE LAW (PROTOCOL DEFINITION):
     ${JSON.stringify(protocol.steps, null, 2)}
+
+    REQUIRED DATA SCHEMA:
+    The "Context" you receive MUST align with this schema. If data is missing for a condition, output action_id: "NO_ACTION" (or "DATA_MISSING" if critical).
+    ${JSON.stringify(protocol.contextSchema, null, 2)}
     
     DIRECTIVES:
     1. You MUST select an Action defined in the "actions" list above.
@@ -108,4 +87,60 @@ function constructSystemPrompt(protocol: Protocol): string {
     4. If no conditions are met, output action_id: "NO_ACTION".
     5. Your specific goal is: ${protocol.description}
     `;
+}
+
+function constructUserPrompt(protocol: Protocol, context: AgentContext): string {
+    return `
+    CURRENT SITUATION (CONTEXT):
+    ${JSON.stringify(context, null, 2)}
+
+    YOUR ORDERS:
+    Analyze the Context against the Protocol Conditions.
+    Decide the Next Best Action.
+    
+    OUTPUT FORMAT ONLY:
+    {
+      "thoughts": ["step-by-step reasoning", "checking condition X..."],
+      "decision": "EXECUTE" | "WAIT" | "BLOCK",
+      "action_id": "exact_id_from_protocol"
+    }
+    `;
+}
+
+function parseAgentResponse(text: string, validActions: ProtocolAction[]): ProtocolStepResult {
+    try {
+        // Simple JSON extraction if wrapped in code blocks
+        const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const json = JSON.parse(cleanText);
+
+        const action = validActions.find(a => a.id === json.action_id);
+
+        if (!action) {
+            // Fallback if AI invents an ID
+            if (json.action_id === 'NO_ACTION') {
+                return {
+                    thoughts: json.thoughts,
+                    decision: 'WAIT',
+                    action: { id: 'NO_ACTION', type: 'AUTOMATION', system: 'INTERNAL', action: 'log_info', params: {} },
+                    raw_response: text
+                }
+            }
+            throw new Error(`Invalid Action ID: ${json.action_id}`);
+        }
+
+        return {
+            thoughts: json.thoughts,
+            decision: json.decision,
+            action: action,
+            raw_response: text
+        };
+
+    } catch (e) {
+        return {
+            thoughts: ["Parsing Error", text],
+            decision: 'BLOCK',
+            action: { id: 'PARSE_ERROR', type: 'AUTOMATION', system: 'INTERNAL', action: 'log_error', params: { raw: text } },
+            raw_response: text
+        };
+    }
 }

@@ -1,0 +1,40 @@
+/Users/suryatejabandlamudi/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+--- Verifying Gemini 3 Pro (gemini-3-pro-preview) ---
+Key Prefix: AIzaSyCk1T...
+
+Target URL: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
+
+Testing 'X-goog-api-key' Header...
+SUCCESS (X-goog-api-key)!
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "I am Gemini, a large language model built by Google.",
+            "thoughtSignature": "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"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 10,
+    "candidatesTokenCount": 12,
+    "totalTokenCount": 724,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 10
+      }
+    ],
+    "thoughtsTokenCount": 702
+  },
+  "modelVersion": "gemini-3-pro-preview",
+  "responseId": "7zg7ab_eNILc_uMPvIzAmAs"
+}
