@@ -9,25 +9,34 @@ export interface VectorDocument {
     embedding: number[]; // Simulated 3-dimensional embedding for demonstration
 }
 
-// "Real" Internal Documents for Tesla
+// "Real" Internal Documents for Tesla (Simulated Multi-Tenant)
 const KNOWLEDGE_BASE: VectorDocument[] = [
+    // --- TESLA (Manufacturing) ---
     {
         id: 'doc_1',
         content: "The 4680 cell production yield in Giga Texas has improved to 94% following the cathode dry-process optimization.",
-        metadata: { source: "Internal Wiki", author: "Drew Baglino", date: "2024-12-01" },
+        metadata: { source: "Internal Wiki", author: "Drew Baglino", date: "2024-12-01", org_id: "TESLA_MFG" },
         embedding: [0.9, 0.1, 0.05]
     },
     {
         id: 'doc_2',
         content: "FSD v13 architecture moves away from C++ heuristics entirely to end-to-end neural networks for vehicle control.",
-        metadata: { source: "Engineering Spec", author: "Ashok Elluswamy", date: "2024-11-15" },
+        metadata: { source: "Engineering Spec", author: "Ashok Elluswamy", date: "2024-11-15", org_id: "TESLA_AI" },
         embedding: [0.1, 0.9, 0.05]
     },
+    // --- PALANTIR (Deployments) ---
     {
-        id: 'doc_3',
-        content: "Cybertruck ramp plan targets 2,500 units/week by end of Q4 2024. Bottleneck identified in rear casting alignment.",
-        metadata: { source: "Q4 Roadmap", author: "Elon Musk", date: "2024-10-01" },
-        embedding: [0.8, 0.2, 0.1]
+        id: 'doc_p1',
+        content: "Apollo upgrade window for NHS deployment set for 0300 UTC. Rollback strategy confirmed via Blue/Green.",
+        metadata: { source: "Deployment Log", author: "Forward Deployed Eng", date: "2024-12-10", org_id: "PLTR_GOV" },
+        embedding: [0.2, 0.8, 0.3]
+    },
+    // --- SPACEX (Logistics) ---
+    {
+        id: 'doc_s1',
+        content: "Starship Flight 6 booster catch mechanism hydraulics pressure test passed. Ready for static fire.",
+        metadata: { source: "Launch Readiness", author: "Bill Gerstenmaier", date: "2024-12-09", org_id: "SPX_OPS" },
+        embedding: [0.8, 0.1, 0.4]
     }
 ];
 
@@ -47,11 +56,16 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
 }
 
 export const RagEngine = {
-    search: (query: string, topK: number = 2) => {
+    search: (query: string, orgId?: string, topK: number = 3) => {
         const queryVec = getEmbedding(query);
 
+        // Filter by Org if provided
+        const candidates = orgId
+            ? KNOWLEDGE_BASE.filter(doc => doc.metadata.org_id === orgId || doc.metadata.org_id === 'GLOBAL')
+            : KNOWLEDGE_BASE;
+
         // Sort logic
-        const results = KNOWLEDGE_BASE.map(doc => ({
+        const results = candidates.map(doc => ({
             ...doc,
             score: cosineSimilarity(queryVec, doc.embedding)
         }))
@@ -61,13 +75,10 @@ export const RagEngine = {
         return results;
     },
 
-    // Simulate an MCP Tool call
+    // MCP Tool Simulation is now handled by lib/actionExecutor.ts
+    // This function remains for legacy compatibility if needed
     runTool: (toolName: string, args: any) => {
-        console.log(`[MCP] Executing tool: ${toolName} with args:`, args);
-        // Return mock results based on tool
-        if (toolName === 'get_factory_status') {
-            return { status: 'WARNING', active_incidents: 2 };
-        }
+        console.log(`[RAG-MCP] Legacy tool call: ${toolName}`, args);
         return { success: true };
     }
 };

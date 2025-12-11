@@ -10,43 +10,53 @@ In Nexus OS, **Protocols are supreme**. They are the single source of truth for 
 
 1.  **Define**: Protocols are defined in `lib/protocols.ts` (The Law).
 2.  **Enforce**: `agentCore.ts` (The Enforcer) uses **Gemini 3 Pro** to strictly follow these protocols.
-3.  **Execute**: Actions are executed against real 3rd-party APIs (ServiceNow, SAP, etc.) or simulated environments.
+3.  **Execute**: Actions are executed via `actionExecutor.ts` (MCP-Lite) against real 3rd-party APIs or simulated environments.
+4.  **Visualize**: `ProtocolRunner.tsx` provides a transparent "Thinking" UI for every decision.
 
-### The "Universal" Engine
-Unlike traditional automation, Nexus OS actions are not hardcoded scripts.
-1.  **Trigger**: An event occurs (e.g., "New Contractor in Workday").
-2.  **Context**: The system gathers relevant data.
-3.  **Agent Decision**: The AI Agent reviews the "Protocol" for that event.
-4.  **Strict Action**: The Agent selects the *only* allowed action from the protocol (e.g., "Draft Access Request"). It cannot hallucinate new actions.
+## 🚀 The 20 Enterprise Protocols (Implemented)
 
-## 🚀 Key Features
+Nexus OS comes pre-loaded with solutions for 20 critical enterprise pain points:
 
-*   **Gemini 3.0 Integration**: Powered exclusively by Google's latest `gemini-3-pro-preview` model for superior reasoning.
-*   **20+ Enterprise Protocols**: Pre-built workflows for ITSM, SecOps, Revenue, and Supply Chain.
-*   **Strict Compliance**: Agents act as "Compliance Officers," ensuring every action is auditable and pre-approved by the protocol.
-*   **Real-Time War Rooms**: Dedicated interfaces for high-priority incidents (e.g., Security Containment).
+### 🛡️ Security & IT (SecOps/ITSM)
+*   **SEC-001**: Impossible Travel Containment (Geo-Velocity Checks)
+*   **SEC-002**: Critical CVE Patch Planning (Tenable -> Jira)
+*   **SEC-003**: Vendor Bank Change Fraud Guard (SAP -> ServiceNow)
+*   **SEC-004**: Third-Party Access Monitor (Idle Vendor Revocation)
+*   **SEC-005**: Incident Evidence Packager (High-Sev Auto-War Room)
+*   **IT-001**: Start-Day Access Preflight (Contractor Onboarding)
+*   **IT-002**: Onboarding Autopilot (Identity/Device/App Orchestration)
+*   **IT-003**: Offboarding Kill-Switch (Immediate Termination)
+*   **IT-004**: Role Change Access Diff (Department Transfer Cleanup)
+*   **IT-005**: CMDB Drift Detector (Unmanaged Asset Tagging)
+
+### 💰 Revenue & Operations (RevOps/Supply Chain)
+*   **REV-001**: Competitor Counter-Offer (Salesforce Competitive Analysis)
+*   **REV-002**: Margin Guardrails (Real-time ERP Cost Check)
+*   **REV-003**: Renewal Risk Warning (Churn Prevention)
+*   **OPS-001**: Promise-to-Deliver Check (Inventory-Aware Commits)
+*   **OPS-002**: Supply Chain Disruption (Port Strike Re-routing)
+
+### ⚖️ Finance, HR & Legal (The "Tail")
+*   **FIN-001**: Duplicate Invoice Blocker (AP Fraud Prevention)
+*   **FIN-002**: CapEx Policy Enforcer (Budget Variance Approval)
+*   **HR-001**: Benefit Enrollment Validator (HSA/HDHP Logic)
+*   **HR-002**: Payroll Variance Anomaly Detection (>10% Check)
+*   **LEG-001**: Legal Hold Automator (Cross-Platform Data Freeze)
 
 ## 🛠️ Technical Stack
 
 *   **Frontend**: Next.js 14, Tailwind CSS, Framer Motion
-*   **AI Runtime**: Google Gemini API (v1beta), Python/TypeScript SDKs
-*   **State Management**: Zustand (Protocol Store)
-*   **Backend**: Python (FastAPI/Flask) for heavy lifting, Next.js API Routes for Agent Orchestration
-
-## 📦 distinct Modules
-
-*   **/gotham**: Security & Cyber Operations
-*   **/foundry**: Data Integration & Ontology
-*   **/itsm**: IT Service Management
-*   **/crm**: Customer & Revenue Operations
-*   **/erp**: Enterprise Resource Planning
+*   **AI Intelligence**: Google Gemini 3.0 Pro (Preview)
+*   **Context Engine**: Vector RAG (Multi-Tenant Support)
+*   **Execution Layer**: MCP-Lite Action Registry
+*   **Backend**: Python (FastAPI/Flask) / Next.js API Routes
 
 ## 🚀 Getting Started
 
 1.  **Install Dependencies**: `npm install`
 2.  **Configure Environment**: Set `GOOGLE_API_KEY` (Gemini 3 enabled).
 3.  **Run Dev Server**: `npm run dev`
-4.  **Verify Protocols**: `npx tsx scripts/verify_protocols.ts`
+4.  **View Protocols**: Navigate to `/protocols` to see the registry.
 
 ---
 *Built for the Autonomous Future.*
