@@ -12,7 +12,7 @@ import { Protocol, ProtocolAction, ProtocolCondition, SystemType, useTeslaStore 
 // --- Icons Map ---
 const SystemIcons: Record<SystemType, any> = {
     SLACK: Layout, // Placeholder
-    TEAMS: Layout,
+    TEAMS: User, // Using User icon for Teams as requested
     EMAIL: Layout,
     WORKDAY: User,
     SAP: Settings,
@@ -21,6 +21,19 @@ const SystemIcons: Record<SystemType, any> = {
     JIRA: Layout,
     SPLUNK: Zap,
     CROWDSTRIKE: Shield
+};
+
+const SystemNames: Record<SystemType, string> = {
+    SLACK: 'Slack',
+    TEAMS: 'Microsoft Teams',
+    EMAIL: 'Email',
+    WORKDAY: 'Workday',
+    SAP: 'SAP',
+    SALESFORCE: 'Salesforce',
+    SERVICENOW: 'ServiceNow',
+    JIRA: 'Jira',
+    SPLUNK: 'Splunk',
+    CROWDSTRIKE: 'CrowdStrike'
 };
 
 interface ProtocolBuilderProps {
@@ -47,6 +60,7 @@ export function ProtocolBuilder({ onClose }: ProtocolBuilderProps) {
             id: `PROT-${Math.floor(Math.random() * 1000)}`,
             title,
             description,
+            contextSchema: {},
             category,
             status: 'ACTIVE',
             createdAt: new Date().toISOString(),
@@ -153,7 +167,9 @@ export function ProtocolBuilder({ onClose }: ProtocolBuilderProps) {
                                             onChange={e => setTriggerSystem(e.target.value as SystemType)}
                                             className="w-full border border-zinc-200 rounded-lg p-2.5 text-sm bg-zinc-50 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
                                         >
-                                            {Object.keys(SystemIcons).map(sys => <option key={sys} value={sys}>{sys}</option>)}
+                                            {Object.keys(SystemIcons).map(sys => (
+                                                <option key={sys} value={sys}>{SystemNames[sys as SystemType]}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div>
@@ -218,7 +234,7 @@ export function ProtocolBuilder({ onClose }: ProtocolBuilderProps) {
                                                 <option value="CONTAINS">Contains</option>
                                             </select>
                                             <input
-                                                value={cond.value}
+                                                value={String(cond.value)}
                                                 onChange={e => {
                                                     const newConds = [...conditions];
                                                     newConds[idx].value = e.target.value;
@@ -289,7 +305,9 @@ export function ProtocolBuilder({ onClose }: ProtocolBuilderProps) {
                                                     }}
                                                     className="border-none bg-transparent font-medium text-sm focus:ring-0 text-zinc-600"
                                                 >
-                                                    {Object.keys(SystemIcons).map(sys => <option key={sys} value={sys}>{sys}</option>)}
+                                                    {Object.keys(SystemIcons).map(sys => (
+                                                        <option key={sys} value={sys}>{SystemNames[sys as SystemType]}</option>
+                                                    ))}
                                                 </select>
                                             </div>
 

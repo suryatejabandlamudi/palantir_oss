@@ -46,11 +46,22 @@ export async function GET() {
             const isApiKey = apiKeyOrToken.startsWith("AIza");
 
             if (isApiKey) {
+                // Define context and trigger for the system instruction
+                // These would typically come from the incident data or user input
+                const context = {
+                    incident_id: "INC-2024-001",
+                    severity: "High",
+                    source: "SIEM Alert",
+                    current_time: new Date().toISOString()
+                };
+                const trigger = "Impossible Travel Detected";
+
                 // Standard SDK Path
                 const genAI = new GoogleGenerativeAI(apiKeyOrToken);
                 const model = genAI.getGenerativeModel({
                     model: "gemini-3-pro-preview",
                     systemInstruction: {
+                        role: "system",
                         parts: [{
                             text: `You are the Nexus OS Security Orchestrator. 
                         Your PRIMARY DIRECTIVE is to STRICTLY FOLLOW Protocol ${protocol?.id}: "${protocol?.title}".
@@ -58,12 +69,18 @@ export async function GET() {
                         PROTOCOL DEFINITION (THE LAW):
                         ${JSON.stringify(protocol?.steps, null, 2)}
                         
-                        You must:
-                        1. Verify the TRIGGER (System: ${protocol?.steps.trigger.system}, Event: ${protocol?.steps.trigger.event}).
-                        2. Evaluate ALL CONDITIONS.
-                        3. If conditions met, RECOMMEND the defined ACTIONS (${protocol?.steps.actions.map(a => a.action).join(', ')}).
-                        4. Do NOT hallucinate actions not in the protocol.
-                        `}]
+                        CONTEXT DATA:
+                        ${JSON.stringify(context, null, 2)}
+                        
+                        USER TRIGGER:
+                        "${trigger}"
+                        
+                        You must output a JSON object with:
+                        - thoughts: array of strings explaining your reasoning
+                        - decision: "EXECUTE" | "WAIT" | "BLOCK"
+                        - action: The EXACT action object to execute (copy from protocol steps if criteria met)
+                        `
+                        }]
                     }
                 });
 

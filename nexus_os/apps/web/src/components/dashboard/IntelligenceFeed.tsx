@@ -77,20 +77,20 @@ export default function IntelligenceFeed() {
 function SignalItem({ signal }: { signal: Signal }) {
     const getIcon = () => {
         switch (signal.type) {
-            case 'RISK': return <AlertTriangle className="w-4 h-4 text-red-500" />;
-            case 'OPPORTUNITY': return <TrendingUp className="w-4 h-4 text-emerald-500" />;
-            case 'OPERATIONAL': return <Activity className="w-4 h-4 text-orange-500" />;
-            case 'INTELLIGENCE': return <Cpu className="w-4 h-4 text-purple-500" />;
+            case 'SECURITY': return <AlertTriangle className="w-4 h-4 text-red-500" />;
+            case 'MARKET': return <TrendingUp className="w-4 h-4 text-emerald-500" />;
+            case 'IOT': return <Activity className="w-4 h-4 text-orange-500" />;
+            case 'LOGISTIC': return <Cpu className="w-4 h-4 text-purple-500" />;
             default: return <Activity className="w-4 h-4 text-gray-500" />;
         }
     };
 
     const getBorderColor = () => {
         switch (signal.type) {
-            case 'RISK': return 'border-l-red-500';
-            case 'OPPORTUNITY': return 'border-l-emerald-500';
-            case 'OPERATIONAL': return 'border-l-orange-500';
-            case 'INTELLIGENCE': return 'border-l-purple-500';
+            case 'SECURITY': return 'border-l-red-500';
+            case 'MARKET': return 'border-l-emerald-500';
+            case 'IOT': return 'border-l-orange-500';
+            case 'LOGISTIC': return 'border-l-purple-500';
             default: return 'border-l-gray-500';
         }
     };

@@ -122,3 +122,133 @@ model RunLog {
   message       String
   metadata      String       // JSON: { tokens: 150, latency: 200ms }
 }
+
+// --- AGENTS & PIPELINES (THE FORGE) ---
+
+model Agent {
+  id            String   @id @default(uuid())
+  name          String
+  role          String
+  model         String   // "GEMINI_PRO_1_5", "GPT_4_O"
+  temperature   Float    @default(0.7)
+  systemPrompt  String
+  
+  // Knowledge Base
+  documents     Document[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  nodes         PipelineNode[]
+}
+
+model AgentPipeline {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  active      Boolean  @default(false)
+  
+  nodes       PipelineNode[]
+  edges       PipelineEdge[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PipelineNode {
+  id          String   @id @default(uuid())
+  pipelineId  String
+  pipeline    AgentPipeline @relation(fields: [pipelineId], references: [id])
+  
+  type        String   // "AGENT", "TOOL", "TRIGGER"
+  label       String
+  
+  // If type == AGENT
+  agentId     String?
+  agent       Agent?   @relation(fields: [agentId], references: [id])
+  
+  // If type == TOOL
+  toolId      String?  // ID from MCP IntegrationAction
+  
+  // Visual Position (ReactFlow)
+  positionX   Float
+  positionY   Float
+  
+  // Config
+  config      String   // JSON
+}
+
+model PipelineEdge {
+  id          String   @id @default(uuid())
+  pipelineId  String
+  pipeline    AgentPipeline @relation(fields: [pipelineId], references: [id])
+  
+  source      String   // Node ID
+  target      String   // Node ID
+  label       String?
+}
+
+// --- RAG & KNOWLEDGE BASE ---
+
+model Document {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   // Raw text content
+  metadata    String   // JSON: { source: "sharepoint", author: "..." }
+  
+  chunks      DocumentChunk[]
+  agents      Agent[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DocumentChunk {
+  id          String   @id @default(uuid())
+  documentId  String
+  document    Document @relation(fields: [documentId], references: [id])
+  
+  content     String
+  embedding   String   // Stored as JSON array or Base64 string for SQLite compatibility (Vector DB usually distinct)
+  
+  index       Int
+}
+
+// --- REAL-TIME SIMULATION LAYER (WARP, GOTHAM, MESH) ---
+
+model Vehicle {
+  id          String   @id @default(uuid())
+  name        String
+  model       String   // "Cybertruck", "Model Y"
+  status      String   // "ACTIVE", "CHARGING", "IDLE", "MAINTENANCE"
+  battery     Int
+  lat         Float
+  lng         Float
+  location    String   // "Austin, TX"
+  speed       Int      // mph
+  heading     Int      // degrees
+  
+  updatedAt   DateTime @updatedAt
+}
+
+model Alert {
+  id          String   @id @default(uuid())
+  title       String
+  severity    String   // "CRITICAL", "HIGH", "MEDIUM", "INFO"
+  category    String   // "SECURITY", "FLEET", "IT"
+  message     String
+  status      String   // "ACTIVE", "RESOLVED"
+  timestamp   DateTime @default(now())
+  
+  // Optional link to a protocol run if this alert triggered one
+  runId       String?
+}
+
+model TerminalLog {
+  id          String   @id @default(uuid())
+  timestamp   DateTime @default(now())
+  type        String   // "SYSTEM", "AGENT", "TOOL", "NETWORK"
+  message     String
+  source      String   // "Sentinel-1", "Orchestrator"
+}

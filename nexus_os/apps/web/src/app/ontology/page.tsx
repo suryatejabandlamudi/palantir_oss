@@ -1,179 +1,146 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import ReactFlow, {
-    Controls,
     Background,
+    Controls,
+    MiniMap,
     useNodesState,
     useEdgesState,
-    addEdge,
     MarkerType,
     Node,
     Edge
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Button, Badge, Card } from '@nexus/ui';
-import { Layers, RefreshCw, Zap, AlertTriangle, CheckCircle2, Factory, Box, Cpu } from 'lucide-react';
 import ModuleLayout from '../../components/layout/ModuleLayout';
-import { useTeslaStore, GraphNode } from '../../lib/teslaState';
-import { useThinking } from '../../components/ui/ThinkingContext';
+import { Card, Button, Badge } from '@nexus/ui';
+import { Hexagon, Search, Database, FileText, Share2, Layers, Search as SearchIcon } from 'lucide-react';
 
-// Custom Node Component to look Premium
-function CustomNode({ data }: { data: any }) {
-    const statusColors = {
-        'OPTIMAL': 'border-green-200 bg-green-50 text-green-700',
-        'WARNING': 'border-yellow-200 bg-yellow-50 text-yellow-700',
-        'CRITICAL': 'border-red-200 bg-red-50 text-red-700 animate-pulse'
-    };
+// --- MOCK REAL DATA (To be replaced by API call to /api/ontology) ---
+const INITIAL_NODES: Node[] = [
+    { id: 'obj-1', type: 'default', position: { x: 250, y: 5 }, data: { label: 'Tesla, Inc.' }, style: { background: '#fff', border: '1px solid #e4e4e7', borderRadius: '8px', width: 180, fontWeight: 'bold' } },
+    { id: 'obj-2', type: 'default', position: { x: 100, y: 150 }, data: { label: 'Model Y' }, style: { background: '#fff', border: '1px solid #e4e4e7', borderRadius: '8px', width: 180 } },
+    { id: 'obj-3', type: 'default', position: { x: 400, y: 150 }, data: { label: 'Giga Texas' }, style: { background: '#fff', border: '1px solid #e4e4e7', borderRadius: '8px', width: 180 } },
+    { id: 'doc-1', type: 'output', position: { x: 400, y: 300 }, data: { label: '📄 Security Protocol 77' }, style: { background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e40af', width: 180 } },
+    { id: 'agent-1', type: 'input', position: { x: 50, y: 300 }, data: { label: 'Agent: Logistics' }, style: { background: '#f5f3ff', border: '1px solid #ddd6fe', color: '#5b21b6', width: 180 } },
+];
 
-    const icons = {
-        'VEHICLE': <Zap className="w-4 h-4 text-blue-500" />,
-        'FACTORY': <Factory className="w-4 h-4 text-zinc-500" />,
-        'PART': <Box className="w-4 h-4 text-orange-500" />,
-        'MATERIAL': <Layers className="w-4 h-4 text-indigo-500" />,
-        'SUPPLIER': <RefreshCw className="w-4 h-4 text-purple-500" />
-    };
-
-    return (
-        <div className={`
-            min-w-[240px] p-4 rounded-xl border backdrop-blur-md shadow-sm transition-all hover:shadow-md
-            ${statusColors[data.status as keyof typeof statusColors] || 'border-zinc-200 bg-white text-zinc-900'}
-        `}>
-            <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center gap-2">
-                    {icons[data.type as keyof typeof icons] || <Box className="w-4 h-4" />}
-                    <span className="font-bold text-sm tracking-wide">{data.label}</span>
-                </div>
-                {data.status === 'CRITICAL' && <AlertTriangle className="w-4 h-4 text-red-500 animate-bounce" />}
-                {data.status === 'OPTIMAL' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
-            </div>
-
-            <div className="text-[10px] text-zinc-500 font-mono mb-3 leading-relaxed">
-                {data.description}
-            </div>
-
-            {/* Metrics */}
-            <div className="grid grid-cols-2 gap-2 text-[10px] uppercase font-bold text-zinc-500">
-                {data.inventory !== undefined && (
-                    <div className="flex flex-col bg-zinc-50 p-1.5 rounded border border-zinc-100">
-                        <span>Inv. Level</span>
-                        <span className="text-zinc-800 font-mono text-xs">{data.inventory.toLocaleString()}</span>
-                    </div>
-                )}
-                <div className="flex flex-col bg-zinc-50 p-1.5 rounded border border-zinc-100">
-                    <span>Type</span>
-                    <span className="text-zinc-600">{data.type}</span>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-const nodeTypes = {
-    custom: CustomNode
-};
+const INITIAL_EDGES: Edge[] = [
+    { id: 'e1-2', source: 'obj-1', target: 'obj-2', animated: true, label: 'MANUFACTURES' },
+    { id: 'e1-3', source: 'obj-1', target: 'obj-3', label: 'OWNS' },
+    { id: 'e3-2', source: 'obj-3', target: 'obj-2', label: 'PRODUCES' },
+    { id: 'e3-d1', source: 'obj-3', target: 'doc-1', label: 'GOVERNED_BY', type: 'step' },
+    { id: 'a1-2', source: 'agent-1', target: 'obj-2', label: 'MONITORS', animated: true, style: { stroke: '#8b5cf6' } },
+];
 
 export default function OntologyPage() {
-    const { ontology, setNodeStatus } = useTeslaStore();
-    const { runAgent, events, state } = useThinking();
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
-    // Transform State to ReactFlow
-    useEffect(() => {
-        if (!ontology) return;
-
-        const layoutNodes: Node[] = ontology.nodes.map((n, i) => ({
-            id: n.id,
-            type: 'custom',
-            // Simple Hierarchy Layout: Factories Top, Vehicles Mid, Parts Bot
-            // Just a rough manual layout for the demo
-            position: {
-                x: n.type === 'FACTORY' ? 400 : (n.type === 'VEHICLE' ? 400 : (n.type === 'PART' ? 100 + (i * 150) : 100 + (i * 100))),
-                y: n.type === 'FACTORY' ? 50 : (n.type === 'VEHICLE' ? 250 : (n.type === 'PART' ? 450 : 650))
-            },
-            data: { ...n }
-        }));
-
-        const layoutEdges: Edge[] = ontology.edges.map(e => ({
-            id: e.id,
-            source: e.source,
-            target: e.target,
-            label: e.label,
-            type: 'smoothstep',
-            animated: true,
-            style: { stroke: '#94a3b8', strokeWidth: 1.5 },
-            labelStyle: { fill: '#64748b', fontWeight: 700, fontSize: 10 },
-            markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8' },
-        }));
-
-        setNodes(layoutNodes);
-        setEdges(layoutEdges);
-    }, [ontology, setNodes, setEdges]);
-
-    // Agent Action to Simulate Crisis
-    const handleSimulateCrisis = () => {
-        runAgent("Simulate Supply Chain Failure: 4680 Cell Shortage due to Lithium constraint. Highlight dependencies.");
-        // Manually trigger visual state update for demo
-        setTimeout(() => {
-            setNodeStatus('PART-4680', 'CRITICAL');
-            setNodeStatus('FAC-TX', 'WARNING');
-            setNodeStatus('VEH-MY', 'WARNING');
-        }, 2000); // Wait for "Thinking"
-    };
+    const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES);
+    const [edges, setEdges, onEdgesChange] = useEdgesState(INITIAL_EDGES);
+    const [selectedObject, setSelectedObject] = useState<any>(null);
 
     return (
         <ModuleLayout
-            title="Master Architecture"
-            description="The Digital Twin - Live Object Graph of the Tesla Ecosystem"
-            icon="🕸️"
-            color="bg-indigo-600 text-white"
-            action={
-                <Button
-                    onClick={handleSimulateCrisis}
-                    className="bg-amber-500 hover:bg-amber-600 text-white shadow-md animate-pulse"
-                >
-                    <AlertTriangle className="w-4 h-4 mr-2" />
-                    Simulate Supply Shock
-                </Button>
-            }
+            title="Ontology"
+            description="Enterprise Knowledge Graph & Data Assets"
+            icon={<Hexagon className="w-6 h-6 text-purple-600" />}
         >
-            <div className="h-[calc(100vh-140px)] w-full bg-zinc-50 rounded-xl border border-zinc-200 overflow-hidden relative shadow-inner">
-                {/* Background Grid */}
-                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
+            <div className="grid grid-cols-12 gap-6 h-[calc(100vh-140px)]">
 
-                <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    nodeTypes={nodeTypes}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    fitView
-                    minZoom={0.5}
-                    maxZoom={1.5}
-                >
-                    <Controls className="bg-white border-zinc-200 text-zinc-600 shadow-md" />
-                    <Background color="#cbd5e1" gap={20} size={1} />
-                </ReactFlow>
+                {/* Graph Area */}
+                <div className="col-span-8 bg-zinc-50 rounded-2xl border border-zinc-200 shadow-sm relative overflow-hidden">
+                    <ReactFlow
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onNodeClick={(_, node) => setSelectedObject(node)}
+                        fitView
+                        attributionPosition="bottom-right"
+                    >
+                        <Background color="#e4e4e7" gap={20} />
+                        <Controls className="bg-white border-zinc-200 shadow-sm" />
+                        <MiniMap className="bg-white border-zinc-200 shadow-sm" nodeColor={() => '#e4e4e7'} />
+                    </ReactFlow>
 
-                {/* Agent Overlay */}
-                {state === 'thinking' && events.length > 0 && (
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur border border-indigo-200 p-4 rounded-xl flex items-center gap-4 text-indigo-700 shadow-2xl z-50">
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-ping" />
-                        <span className="font-mono text-sm max-w-md truncate">
-                            {(() => {
-                                const last = events[events.length - 1];
-                                if (!last) return "Analyzing graph dependencies...";
-                                if ('content' in last) return last.content;
-                                if (last.type === 'tool_start') return `Executing ${last.tool}...`;
-                                if (last.type === 'tool_end') return `Finished ${last.tool}`;
-                                return "Processing...";
-                            })()}
-                        </span>
+                    <div className="absolute top-4 left-4 bg-white/80 backdrop-blur px-3 py-2 rounded-lg border border-zinc-200 shadow-sm flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        <span className="text-xs font-medium text-zinc-600">Real-Time Sync Active</span>
                     </div>
-                )}
+                </div>
+
+                {/* Right Panel: Object Details & RAG Search */}
+                <div className="col-span-4 flex flex-col gap-6">
+                    {/* Search / Explore Tool */}
+                    <Card className="bg-white border border-zinc-200 p-0 overflow-hidden shadow-sm">
+                        <div className="p-4 border-b border-zinc-100 bg-zinc-50/50">
+                            <h3 className="text-xs font-bold uppercase text-zinc-500 flex items-center gap-2">
+                                <SearchIcon className="w-3 h-3" />
+                                Semantic Search
+                            </h3>
+                        </div>
+                        <div className="p-4 space-y-3">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Ask the knowledge base..."
+                                    className="w-full pl-9 pr-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                                />
+                                <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
+                            </div>
+                            <div className="flex gap-2 text-[10px] text-zinc-500">
+                                <span>Suggested:</span>
+                                <span className="hover:text-purple-600 cursor-pointer underline decoration-dotted">Model Y defects</span>
+                                <span className="hover:text-purple-600 cursor-pointer underline decoration-dotted">Berlin Output</span>
+                            </div>
+                        </div>
+                    </Card>
+
+                    {/* Object Details */}
+                    <Card className="flex-1 bg-white border border-zinc-200 p-0 overflow-hidden shadow-sm flex flex-col">
+                        <div className="p-4 border-b border-zinc-100 bg-zinc-50/50">
+                            <h3 className="text-xs font-bold uppercase text-zinc-500 flex items-center gap-2">
+                                <Layers className="w-3 h-3" />
+                                Selected Entity
+                            </h3>
+                        </div>
+                        <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                            {selectedObject ? (
+                                <div className="w-full text-left">
+                                    <div className="w-12 h-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-4 border border-zinc-200">
+                                        {selectedObject.type === 'output' ? <FileText className="w-6 h-6 text-blue-500" /> : <Database className="w-6 h-6 text-zinc-400" />}
+                                    </div>
+                                    <h2 className="text-xl font-bold text-zinc-900">{selectedObject.data.label}</h2>
+                                    <Badge variant="outline" className="mt-2 text-xs font-normal text-zinc-500 border-zinc-200 bg-zinc-50">
+                                        ID: {selectedObject.id}
+                                    </Badge>
+
+                                    <div className="mt-6 space-y-4">
+                                        <div className="bg-zinc-50 p-3 rounded-lg border border-zinc-100">
+                                            <span className="text-[10px] uppercase font-bold text-zinc-400 block mb-1">Properties</span>
+                                            <div className="grid grid-cols-2 gap-2 text-xs">
+                                                <div className="text-zinc-500">Owner</div>
+                                                <div className="text-zinc-900 font-medium text-right">System</div>
+                                                <div className="text-zinc-500">Created</div>
+                                                <div className="text-zinc-900 font-medium text-right">24 Oct 2024</div>
+                                            </div>
+                                        </div>
+
+                                        <Button className="w-full border-zinc-200 hover:bg-zinc-50 text-zinc-700 bg-white shadow-sm">
+                                            <Share2 className="w-3 h-3 mr-2" /> View Lineage
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="opacity-40">
+                                    <Hexagon className="w-12 h-12 mb-2 text-zinc-300 mx-auto" strokeWidth={1} />
+                                    <p className="text-sm text-zinc-500">Select an node to view properties</p>
+                                </div>
+                            )}
+                        </div>
+                    </Card>
+                </div>
+
             </div>
         </ModuleLayout>
     );
 }
-

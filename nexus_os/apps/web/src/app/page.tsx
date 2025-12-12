@@ -5,10 +5,10 @@ import { ProtocolCard } from "@/components/ProtocolCard";
 import { useState, useEffect, useMemo } from "react";
 import { Terminal, LayoutDashboard, Zap, ShieldCheck, TrendingUp, Box } from "lucide-react";
 import Link from "next/link";
-import { useTeslaStore, ResolutionProtocol } from "@/lib/teslaState";
+import { useTeslaStore, Protocol } from "@/lib/teslaState";
 
 // Mapper to convert Store Protocol to UI Card Props
-const mapDomain = (category: ResolutionProtocol['category']): "IT" | "SEC" | "REV" | "SC" => {
+const mapDomain = (category: Protocol['category']): "IT" | "SEC" | "REV" | "SC" => {
   switch (category) {
     case 'ITSM': return 'IT';
     case 'SecOps': return 'SEC';
@@ -154,8 +154,11 @@ export default function Home() {
                       id={p.id}
                       title={p.title}
                       domain={mapDomain(p.category)}
-                      status={p.status === 'running' ? 'active' : p.status === 'idle' ? 'waiting' : p.status}
-                      steps={p.steps.length > 0 ? p.steps : [{ type: 'trigger', content: p.trigger }]}
+                      status={p.status === 'ACTIVE' ? 'active' : 'waiting'}
+                      steps={[
+                        { type: 'trigger' as const, content: p.steps?.trigger?.event || 'Manual Trigger' },
+                        ...(p.steps?.actions?.map(a => ({ type: 'action' as const, content: a.action })) || [])
+                      ]}
                       timestamp="Live"
                     />
                   </div>

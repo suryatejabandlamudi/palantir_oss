@@ -1,5 +1,7 @@
+
 import { PrismaClient } from '@prisma/client';
-import { INITIAL_PROTOCOLS } from '../src/lib/protocols';
+import { Protocol } from '../src/lib/protocols';
+import { INITIAL_PROTOCOLS } from './initial_data'; // Import data from seed file
 
 const prisma = new PrismaClient();
 
@@ -24,7 +26,7 @@ async function main() {
     const actionMap = new Map<string, string>(); // actionKey -> actionId
 
     for (const p of INITIAL_PROTOCOLS) {
-        console.log(`Processing [${p.id}] ${p.title}...`);
+        console.log(`Processing[${p.id}] ${p.title}...`);
 
         // 1. Ensure Integrations and Actions exist for this protocol
         // Legacy protocols have steps.actions array
@@ -33,9 +35,9 @@ async function main() {
             const actionKey = stepAction.action; // e.g., "lock_user" OR the specific ID from legacy if unique? Legacy uses "action" as the verb.
             // stepAction also has "id" e.g. "a_sec1".
             // Let's use `stepAction.action` as the key for the IntegrationAction (e.g. "lock_user").
-            // However, different systems might have "lock_user". So unique key should be `${sysKey}_${actionKey}`.
+            // However, different systems might have "lock_user". So unique key should be `${ sysKey }_${ actionKey } `.
 
-            const uniqueActionKey = `${sysKey}_${actionKey}`.toLowerCase(); // e.g. salesforce_lock_user
+            const uniqueActionKey = `${sysKey}_${actionKey} `.toLowerCase(); // e.g. salesforce_lock_user
 
             // 1a. Upsert Integration
             if (!systemMap.has(sysKey)) {
@@ -58,7 +60,7 @@ async function main() {
             // 1b. Upsert Action
             if (!actionMap.has(stepAction.id)) {
                 // Special case for OPS-001 description improvement (hack for demo)
-                let desc = `Execute ${stepAction.action}`;
+                let desc = `Execute ${stepAction.action} `;
                 let name = stepAction.action;
                 if (stepAction.id === 'ops_check_production' || stepAction.id === 'sap_check_inventory') {
                     name = 'Check Production Schedule';

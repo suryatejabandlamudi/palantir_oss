@@ -1,12 +1,130 @@
 import { NextResponse } from 'next/server';
 import { ExternalSystemMocks } from '@/lib/external_mocks';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Simulate realistic network/thinking latency
+// Simulate realistic network/thinking latency for fallback
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function POST(req: Request) {
     const body = await req.json();
-    const { protocolId, trigger } = body;
+    const { protocolId, trigger, pipeline, inputs } = body;
+
+    // --- PIPELINE LOADING FROM DB ---
+    // If protocolId looks like a UUID, assume it's a DB Pipeline
+    let dbPipeline = null;
+    let agentNode = null;
+
+    if (protocolId && protocolId.includes('-')) {
+        try {
+            // Need to import Prisma inside scope or lazily
+            // Using direct fetch for simplicity in this file context, but ideally we use the prisma singleton
+            // For now, let's rely on the passed 'pipeline' object if present, OR fetch it.
+            // Since we can't easily import PrismaClient here without creating connection issues in edge/serverless contexts sometimes,
+            // we will simulate the fetch or assume 'pipeline' body param is populated by the caller (The Mesh).
+
+            // Actually, let's try to just assume the body has it for now to avoid 'fs' issues in Edge runtime if configured.
+            // But user wants "Real DB".
+
+            // To do this properly in Next.js App Router route handlers:
+            const { PrismaClient } = require('@prisma/client');
+            const prisma = new PrismaClient();
+
+            const pipelineRecord = await prisma.agentPipeline.findUnique({
+                where: { id: protocolId },
+                include: { nodes: { include: { agent: true } }, edges: true }
+            });
+
+            if (pipelineRecord) {
+                dbPipeline = pipelineRecord;
+                // Find the agent node
+                const node = dbPipeline.nodes.find((n: any) => n.config?.includes('AGENT') || n.agentId);
+                if (node && node.agent) {
+                    agentNode = node.agent;
+                }
+            }
+        } catch (e) {
+            console.warn("Failed to load pipeline from DB, falling back to static/mock", e);
+        }
+    }
+
+    // --- REAL GEMINI INTEGRATION ---
+    const apiKey = process.env.GOOGLE_API_KEY;
+
+    if (apiKey && (dbPipeline || protocolId)) {
+        try {
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+            // Construct Prompt based on Pipeline Context or Default Protocol logic
+            let systemInstruction = "You are an autonomous AI agent for Enterprise Operations.";
+            let userPrompt = `Trigger Event: ${trigger || JSON.stringify(inputs)}`;
+
+            // Override with Real Agent from DB
+            if (agentNode) {
+                systemInstruction = agentNode.systemPrompt;
+                userPrompt += `\nRole: ${agentNode.role}`;
+                // We could also mix in RAG here
+            } else if (pipeline) {
+                // If we have a rich Pipeline object from the Builder
+                const primaryAgent = pipeline.nodes.find((n: any) => n.id.includes('agent'));
+                if (primaryAgent) {
+                    systemInstruction = primaryAgent.systemPrompt;
+                    userPrompt += `\nRole: ${primaryAgent.role}\nAvailable Tools: ${primaryAgent.tools.join(', ')}`;
+                }
+            }
+
+            const prompt = `
+            ${systemInstruction}
+            
+            TASK: Analyze the trigger and decide on a course of action.
+            You have access to simulated enterprise tools.
+            
+            RESPOND IN JSON FORMAT ONLY:
+            {
+                "thought": "your internal reasoning",
+                "tool_call": "service.function(args)",
+                "final_result": "summary of action"
+            }
+            
+            ${userPrompt}
+            `;
+
+            const result = await model.generateContent(prompt);
+            const response = result.response;
+            const text = response.text();
+
+            // Attempt to parse JSON response
+            let parsed;
+            try {
+                // simple cleanup in case markdown code blocks are used
+                const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                parsed = JSON.parse(cleanText);
+            } catch (e) {
+                // Fallback if model didn't output JSON
+                parsed = {
+                    thought: text,
+                    tool_call: null,
+                    final_result: "Processed with Gemini (Non-JSON Output)"
+                };
+            }
+
+            return NextResponse.json({
+                steps: [
+                    { type: 'trigger', content: `Signal Processing: ${trigger}` },
+                    { type: 'thought', content: parsed.thought },
+                    parsed.tool_call ? { type: 'action', content: parsed.tool_call } : null,
+                    { type: 'result', content: parsed.final_result }
+                ].filter(Boolean)
+            });
+
+        } catch (error) {
+            console.error("Gemini API Error, falling back to simulation:", error);
+            // Fallthrough to simulation
+        }
+    }
+
+    // --- FALLBACK SIMULATION (Previous Logic) ---
+    // Useful if no API Key or API fails
 
     const steps = [];
 
@@ -121,3 +239,4 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ steps });
 }
+
